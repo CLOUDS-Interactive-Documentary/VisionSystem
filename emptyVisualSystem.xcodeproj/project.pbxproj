@@ -788,8 +788,8 @@
 		3DA45C5F179DB6C3002EC0AC /* vs_src */ = {
 			isa = PBXGroup;
 			children = (
-				3DA460BA179EC5C2002EC0AC /* emptyVisualSystem.cpp */,
 				3DA460BB179EC5C2002EC0AC /* emptyVisualSystem.h */,
+				3DA460BA179EC5C2002EC0AC /* emptyVisualSystem.cpp */,
 			);
 			path = vs_src;
 			sourceTree = SOURCE_ROOT;

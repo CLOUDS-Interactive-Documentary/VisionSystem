@@ -17,6 +17,10 @@ void emptyVisualSystem::selfSetup()
     
 }
 
+void emptyVisualSystem::selfPresetLoaded(string presetPath){
+	
+}
+
 void emptyVisualSystem::selfBegin()
 {
     

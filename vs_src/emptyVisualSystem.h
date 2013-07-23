@@ -1,6 +1,5 @@
 //
 //  emptyVisualSystem.h
-//  World
 //
 //  Created by Patricio Gonzalez Vivo on 7/23/13.
 //
@@ -18,6 +17,8 @@ public:
     void selfSetup();
     void selfSetupGuis();
     
+	void selfPresetLoaded(string presetPath);
+	
     void selfAutoMode();
     void selfUpdate();
     void selfDrawBackground();
@@ -47,6 +48,6 @@ public:
     
 protected:
     
-    //  You Stuff
+    //  Your Stuff
     //
 };
