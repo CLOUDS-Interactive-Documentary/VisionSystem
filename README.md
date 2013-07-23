@@ -102,6 +102,10 @@ This environment use some addons from the community. Go to addons...
 		
 ## Making your own VisualSystem
 
+Once you follow the installation process you can compile and see the emptyVisualSystem working. To make your own VisualSystem you need to duplicate the emptyVisualSystem folder. And then rename the `emptyVisualSystem.h` and `emptyVisualSystem.cpp`
+
+This will require some extra renaming on the `testApp.h` source as well. 
+
 ### Your Code 
 
 As you can see there is `vs_src` folder. That's were your extended class of `CloudsVisualSystem` will be together with all the classes you make. This folder together with the content of the `data` folder witch also contents your **Presets** are going to be merge with the CLOUDS apps.
