@@ -10,16 +10,23 @@ Together with [James George](http://jamesgeorge.org/)'s `ofxTimeLine` this envir
 
 ## Install
 
+### Clone the emptyVisualSystem Example
+
+	cd openFrameworks
+	cd apps/myApps
+	git clone git@github.com:CLOUDS-Interactive-Documentary/emptyVisualSystem.git
+
 ### Add VisualSystemLibraries Submodule
 
-The first thing you need to do is to get a copy of the VisualSystemsLibrary. This contain the source of Reza's Rezonator mixed with James's ofxTimeLine. Together this provide the abstract class you will extend in order to make your own VisualSystem.
+Once the repo is cloned you need to pull the VisualSystemsLibrary submodule. This contain the source of Reza's Rezonator mixed with James's ofxTimeLine. Together this provide the abstract class you will extend in order to make your own VisualSystem.
 
-	cd emptyVisualSystem
+	
+	cd emptyVisualSystem	
 	git pull && git submodule init && git submodule update && git submodule status
 
 ### Modify ofMaterial
 
-Go to `ofMaterial.h` and change this functions to pass by reference:
+The resonator let you adjust the camera, lights and other important rendering sets like the material. In order to be able to change the material properties from the GUI we need to modify `openframeworks/libs/openFrameworks/gl/ofMaterial.h` by forcing this functions to pass their values by reference:
 
 	ofFloatColor &getDiffuseColor();
 	ofFloatColor &getAmbientColor();
@@ -51,6 +58,10 @@ Do the same on the `ofMaterial.cpp`:
 	
 ### Install Addons
 
+This environment use some addons from the community. Go to addons and start adding them.
+
+	cd ../../../addons/
+
 * [ofxRange](https://github.com/Flightphase/ofxRange) by James George
 
 		git clone git@github.com:Flightphase/ofxRange.git
@@ -74,6 +85,7 @@ Do the same on the `ofMaterial.cpp`:
 * [ofxTimeline](https://github.com/YCAMInterlab/ofxTimeline) by James George
 
 		git clone git@github.com:YCAMInterlab/ofxTimeline.git
+		git checkout develop
 		
 * [ofxCameraSaveLoad](https://github.com/roymacdonald/ofxCameraSaveLoad) by Roy MacDonald
 
