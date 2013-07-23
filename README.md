@@ -10,18 +10,33 @@ Together with [James George](http://jamesgeorge.org/)'s `ofxTimeLine` this envir
 
 ## Install
 
-### Clone the emptyVisualSystem Example
+### Create your own visual system
 
 	cd openFrameworks
 	cd apps/myApps
-	git clone git@github.com:CLOUDS-Interactive-Documentary/emptyVisualSystem.git
+	git clone https://github.com/CLOUDS-Interactive-Documentary/emptyVisualSystem
 
-### Add VisualSystemLibraries Submodule
+	2) run git submodule init
+	
+	Once the repo is cloned you need to pull the VisualSystemsLibrary submodule. This contain the source of Reza's Rezonator mixed with James's ofxTimeLine. Together this provide the abstract
+	class you will extend in order to make your own VisualSystem.
 
-Once the repo is cloned you need to pull the VisualSystemsLibrary submodule. This contain the source of Reza's Rezonator mixed with James's ofxTimeLine. Together this provide the abstract class you will extend in order to make your own VisualSystem.
+		cd emptyVisualSystem	
+		git pull && git submodule init && git submodule update && git submodule status
 
-	cd emptyVisualSystem	
-	git pull && git submodule init && git submodule update && git submodule status
+	3) create a new repo on CLOUDS-Interactive-Documentary, for example 'Ocean' and at git@github.com:CLOUDS-Interactive-Documentary/Ocean
+
+	4) make a copy of emptyVisualSystem folder in myApps/ and rename it to Ocean
+
+	5) in the terminal, cd into Ocean/ and do the following 3 commands
+
+		git remote rm origin
+		git remote add origin git@github.com:CLOUDS-Interactive-Documentary/<YourRepoName>.git 
+		git push -u origin master
+
+	This will redirect the empty repo to your new repo
+
+	6) rename the project files and files and you are good to go
 
 ### Modify ofMaterial
 
