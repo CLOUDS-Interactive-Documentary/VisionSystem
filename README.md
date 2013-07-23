@@ -20,7 +20,6 @@ Together with [James George](http://jamesgeorge.org/)'s `ofxTimeLine` this envir
 
 Once the repo is cloned you need to pull the VisualSystemsLibrary submodule. This contain the source of Reza's Rezonator mixed with James's ofxTimeLine. Together this provide the abstract class you will extend in order to make your own VisualSystem.
 
-	
 	cd emptyVisualSystem	
 	git pull && git submodule init && git submodule update && git submodule status
 
@@ -58,9 +57,11 @@ Do the same on the `ofMaterial.cpp`:
 	
 ### Install Addons
 
-This environment use some addons from the community. Go to addons and start adding them.
+This environment use some addons from the community. Go to addons...
 
 	cd ../../../addons/
+	
+…  and start adding:
 
 * [ofxRange](https://github.com/Flightphase/ofxRange) by James George
 
@@ -103,9 +104,28 @@ This environment use some addons from the community. Go to addons and start addi
 
 ### Your Code 
 
-Your as you can see there is `vs_src` folder. There will be the extended class of `CloudsVisualSystem` together with all the classes your VS need.
+As you can see there is `vs_src` folder. That's were your extended class of `CloudsVisualSystem` will be together with all the classes you make. This folder together with the content of the `data` folder witch also contents your **Presets** are going to be merge with the CLOUDS apps.
 
+It's very important that you are consistent with the name of your VisualSystem. The name you choose for it have to be the same of your repo and embed on your extended class. Please put the name of it after 'CloudVisualSystem______' so if your VisualSystem is call "World" the repo will be call "World" and the extended class "CloudVisualSystemWorld".
+
+One of the first things you may change on your custom extended class is the `getSystemName()` function in order to return the exact name of your VS ( and/or your repo)
+
+	string CloudVisualSystemWorld::getSystemName()
+	{
+		return "World";
+	}
+
+By doing this the extended class will know how to access to his own `data/` folder when is embedded on the main CLOUDS app.
+ 
 ### Hot-Keys 
+
+* F : Toogle Fullscreen
+* H : Hide/Show GUI
+* E : Arrange GUI in Cascade  
+* R : Arrange GUI at Top
+* T : Minimize GUI
+* Y : Arrange GUI in circle
+* ` : Take a snapshoot
 
 ### How to Animate?
 
