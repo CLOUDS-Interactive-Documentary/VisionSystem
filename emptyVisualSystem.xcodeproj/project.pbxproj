@@ -260,7 +260,6 @@
 		3DA460C1179ED608002EC0AC /* CloudsRGBDCombinedRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudsRGBDCombinedRenderer.h; sourceTree = "<group>"; };
 		3DA460C2179ED608002EC0AC /* CloudsVisualSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CloudsVisualSystem.cpp; sourceTree = "<group>"; };
 		3DA460C3179ED608002EC0AC /* CloudsVisualSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudsVisualSystem.h; sourceTree = "<group>"; };
-		3DA460C4179ED608002EC0AC /* ofxExtras.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxExtras.h; sourceTree = "<group>"; };
 		3DA460C5179ED608002EC0AC /* ofxLight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxLight.h; sourceTree = "<group>"; };
 		3DA460C6179ED608002EC0AC /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 		3DEFE110176E7D8000139095 /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tinyxml.cpp; sourceTree = "<group>"; };
@@ -802,7 +801,6 @@
 				3DA460C1179ED608002EC0AC /* CloudsRGBDCombinedRenderer.h */,
 				3DA460C2179ED608002EC0AC /* CloudsVisualSystem.cpp */,
 				3DA460C3179ED608002EC0AC /* CloudsVisualSystem.h */,
-				3DA460C4179ED608002EC0AC /* ofxExtras.h */,
 				3DA460C5179ED608002EC0AC /* ofxLight.h */,
 				3DA460C6179ED608002EC0AC /* README.md */,
 			);
