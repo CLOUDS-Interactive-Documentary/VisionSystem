@@ -8,9 +8,21 @@ In order to make the process of making a VisualSystem efficient and easy. We hav
 Together with [James George](http://jamesgeorge.org/)'s `ofxTimeLine` this environment provides the ability to animate those changes over time.
 
 
-## Install
+## Create your own visual system
 
-### Create your own visual system
+### Fast Way:
+	
+	
+	Download openFrameworks 0.7.4 http://www.openframeworks.cc/download/
+	
+	Download http://cloudsdocumentary.com/codestorm/VisualSystemTemplate.zip
+	
+	unzip VisualSystemTemplate.zip into apps/myApps
+	
+	rename project files
+	
+	
+### Github Way: 
 
 	cd openFrameworks
 	cd apps/myApps
