@@ -9,7 +9,7 @@
 
 #include "CloudsVisualSystem.h"
 
-class emptyVisualSystem : public CloudsVisualSystem {
+class CloudsVisionSystem : public CloudsVisualSystem {
 public:
     
     string getSystemName();
