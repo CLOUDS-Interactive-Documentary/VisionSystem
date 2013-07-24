@@ -8,6 +8,11 @@
 #pragma once
 
 #include "CloudsVisualSystem.h"
+#include "ofxCv.h"
+#include "CarAccumulator.h"
+#include "Car.h"
+#include "ParkedCar.h"
+#include "Path.h"
 
 class CloudsVisionSystem : public CloudsVisualSystem {
 public:
@@ -48,6 +53,19 @@ public:
     
 protected:
     
-    //  Your Stuff
-    //
+    ofVideoPlayer player;
+	ofxCv::ContourFinder contourFinder;
+	ofxCv::RectTrackerFollower<Car> tracker;
+    
+    ofImage thresholded;
+    ofxCv::RunningBackground background;
+    
+    CarAccumulator accumulator;
+    cv::Rect accumRegion;
+    ofPolyline bounds;
+    
+    ofImage img;
+    vector<ParkedCar> parked;
+    
+    Path p;
 };
