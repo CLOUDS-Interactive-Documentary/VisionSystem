@@ -18,7 +18,7 @@
 class Car : public ofxCv::RectFollower {
 protected:
 	ofColor color;
-	ofVec2f cur, smooth;
+	ofVec3f cur, smooth;
 	float startedDying;
 	ofPolyline all;
 
@@ -30,6 +30,7 @@ public:
 	void update(const cv::Rect& track);
 	void kill();
 	void draw();
+    ofPolyline getLifeSpan();
     int getLifeTime();
     cv::Rect getBoundingBox();
     ofVec2f getTangentAtPoint(int history);

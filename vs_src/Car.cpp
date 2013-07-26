@@ -49,17 +49,18 @@ void Car::draw() {
 		size = ofMap(ofGetElapsedTimef() - startedDying, 0, dyingTime, size, 0, true);
 	}
 	ofNoFill();
-ofCircle(cur, size);
+    ofCircle(cur, size);
 	ofSetColor(color);
-    ofCircle(boundingBox.x, boundingBox.y, 10);
+    ofCircle(boundingBox.x, boundingBox.y, size);
 	all.draw();
 	ofSetColor(255);
 	ofDrawBitmapString(ofToString(label), cur);
-
-
 	ofPopStyle();
 }
 
+ofPolyline Car::getLifeSpan(){
+    return all;
+}
 int Car::getLifeTime(){
     return all.getVertices().size();
 }

@@ -11,6 +11,7 @@ void testApp::setup(){
 
 //--------------------------------------------------------------
 void testApp::update(){
+    visualSystem.selfUpdate();
 }
 
 

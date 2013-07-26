@@ -54,18 +54,30 @@ public:
 protected:
     
     ofVideoPlayer player;
+    ofVideoPlayer player2;
+    ofVideoPlayer currentPlayer;
 	ofxCv::ContourFinder contourFinder;
 	ofxCv::RectTrackerFollower<Car> tracker;
-    
+    int movieIndex;
+    vector<string> movieStrings;
+    float cvPersistance;
+    float cvMaxDistance;
+    float cvMinAreaRadius;
+    float cvMaxAreaRadius;
+    float cvThresholdValue;
+    bool cvUpdateParameters;
+    void updateCVParameters();
     ofImage thresholded;
     ofxCv::RunningBackground background;
-    
+    ofxCv::RunningBackground background2;
+    int playerIndex;
     CarAccumulator accumulator;
     cv::Rect accumRegion;
     ofPolyline bounds;
-    
+    ofFbo fbo;
     ofImage img;
     vector<ParkedCar> parked;
-    
-    Path p;
+    ofMesh mesh;
+    vector<ofPolyline> carLifespan;
+//    Path p;
 };
