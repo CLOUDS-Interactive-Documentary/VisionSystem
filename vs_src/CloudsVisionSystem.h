@@ -14,6 +14,12 @@
 #include "ParkedCar.h"
 #include "Path.h"
 
+typedef enum{
+    OpticalFlow =0,
+    ControurTracking
+
+}CVMode;
+
 class CloudsVisionSystem : public CloudsVisualSystem {
 public:
     
@@ -53,31 +59,55 @@ public:
     
 protected:
     
+    //video player stuff
     ofVideoPlayer player;
-    ofVideoPlayer player2;
-    ofVideoPlayer currentPlayer;
-	ofxCv::ContourFinder contourFinder;
-	ofxCv::RectTrackerFollower<Car> tracker;
+    int playerIndex;
     int movieIndex;
     vector<string> movieStrings;
+    CVMode currentMode;
+    vector<ofRectangle> flowRegions;
+    
+    //Contour tracking stuff
+    ofxCv::ContourFinder contourFinder;
+	ofxCv::RectTrackerFollower<Car> tracker;
+    void updateCVParameters();
+    ofImage thresholded;
+    ofxCv::RunningBackground background;
+    CarAccumulator accumulator;
+    cv::Rect accumRegion;
+    ofPolyline bounds;
+    vector<ParkedCar> parked;
+    
+    
+    //Optical flow types
+    ofxCv::FlowFarneback farneback;
+	ofxCv::FlowPyrLK pyrLk;
+	ofxCv::Flow* curFlow;
+    void updateOpticalFlow();
+    
+    //OPTICAL FLOW PARAMETERS
+    float pyrScale;
+    float levels;
+    float winsize;
+    float iterations;
+    float polyN;
+    float polySigma;
+    bool useFarneback;
+    float winSize;
+    float maxLevel;
+    float maxFeatures;
+    float qualityLevel;
+    float minDistance;
+    //    OPTFLOW_FARNEBACK_GAUSSIAN
+    
+    //CONTUR PARAMETERS
     float cvPersistance;
     float cvMaxDistance;
     float cvMinAreaRadius;
     float cvMaxAreaRadius;
     float cvThresholdValue;
     bool cvUpdateParameters;
-    void updateCVParameters();
-    ofImage thresholded;
-    ofxCv::RunningBackground background;
-    ofxCv::RunningBackground background2;
-    int playerIndex;
-    CarAccumulator accumulator;
-    cv::Rect accumRegion;
-    ofPolyline bounds;
-    ofFbo fbo;
-    ofImage img;
-    vector<ParkedCar> parked;
-    ofMesh mesh;
-    vector<ofPolyline> carLifespan;
-//    Path p;
+    
+    
+    
 };

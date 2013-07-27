@@ -14,15 +14,31 @@ string CloudsVisionSystem::getSystemName()
 
 void CloudsVisionSystem::selfSetup()
 {
-//    bClearBackground
+    currentMode = OpticalFlow;
+    curFlow = &pyrLk;
     movieIndex =0;
+    pyrScale = 0.5;
+    levels =4;
+    winsize = 8;    
+    iterations =2;
+    polyN = 7;
+    polySigma = 1.5;
+    useFarneback = true;
+    winSize =32;
+    maxLevel =  3;
+    maxFeatures = 200;
+    qualityLevel = 0.01;
+    minDistance = 4;
+    
     cvPersistance =3;
     cvMaxDistance = 80;
     cvMinAreaRadius =15;
     cvMaxAreaRadius = 100;
     cvThresholdValue = 25;
     cvUpdateParameters = false;
+    
     //	app
+    movieStrings.push_back("unionsq_1 - Wi-Fi.m4v");
     movieStrings.push_back("indianTraffic.mov");
     movieStrings.push_back("Road 2.mov");
     
@@ -35,27 +51,48 @@ void CloudsVisionSystem::selfSetup()
         cout<<"Not Playing"<<endl;
         
     }
-    if(player2.loadMovie(movieStrings[1])){
-        player2.play();
-    }
-    else{
-        cout<<"Not Playing"<<endl;
-        
-    }
-    currentPlayer = player;
-    playerIndex =0;
-    //This is the test movie
+    
+    
+    
     
     updateCVParameters();
+    
+    
+}
 
+void CloudsVisionSystem::updateOpticalFlow(){
+    
+    
+    if(useFarneback) {
+        curFlow = &farneback;
+        farneback.setPyramidScale( pyrScale);
+        farneback.setNumLevels( levels );
+        farneback.setWindowSize( winsize) ;
+        farneback.setNumIterations( iterations);
+        farneback.setPolyN( polyN) ;
+        farneback.setPolySigma( polySigma );
+        farneback.setUseGaussian(OPTFLOW_FARNEBACK_GAUSSIAN);
+        
+    } else {
+        curFlow = &pyrLk;
+        pyrLk.setMaxFeatures( maxFeatures);
+        pyrLk.setQualityLevel( qualityLevel );
+        pyrLk.setMinDistance( minDistance);
+        pyrLk.setWindowSize( winSize);
+        pyrLk.setMaxLevel( maxLevel);
+    }
+    
+    //check it out that that you can use Flow polymorphically
+    curFlow->calcOpticalFlow(player);
 
 }
+
 void CloudsVisionSystem::updateCVParameters(){
     //  background subtraction
-        background.setDifferenceMode(RunningBackground::ABSDIFF);
-        background.setLearningTime(15);
-        background.setThresholdValue(25);
-        
+    background.setDifferenceMode(RunningBackground::ABSDIFF);
+    background.setLearningTime(15);
+    background.setThresholdValue(25);
+    
 	contourFinder.setMinAreaRadius(cvMinAreaRadius);
 	contourFinder.setMaxAreaRadius(cvMaxAreaRadius);
 	contourFinder.setThreshold(cvThresholdValue);
@@ -69,11 +106,13 @@ void CloudsVisionSystem::updateCVParameters(){
     //TODO make it an up vector, not down vector
     accumulator.setUpVector(ofVec2f(0.0,-1.0));
     bounds.addVertex(0,0);
-    bounds.addVertex(currentPlayer.getWidth(),0);
-    bounds.addVertex(currentPlayer.getWidth(),currentPlayer.getHeight());
-    bounds.addVertex(0,currentPlayer.getHeight());
+    bounds.addVertex(player.getWidth(),0);
+    bounds.addVertex(player.getWidth(),player.getHeight());
+    bounds.addVertex(0,player.getHeight());
     accumulator.setBounds(bounds);
-
+    
+    
+    
     
 }
 void CloudsVisionSystem::selfPresetLoaded(string presetPath){
@@ -82,6 +121,7 @@ void CloudsVisionSystem::selfPresetLoaded(string presetPath){
 
 void CloudsVisionSystem::selfBegin()
 {
+    
     
     
 }
@@ -98,23 +138,52 @@ void CloudsVisionSystem::selfExit()
 
 void CloudsVisionSystem::selfSetupSystemGui()
 {
-    sysGui->addLabel("CV PARAMS");
-    sysGui->addSlider("PERSISTANCE", 0,10,cvPersistance);
-    sysGui->addSlider("MAXDISTANCE", 0,10,cvPersistance);
-    sysGui->addSlider("MIN AREA RADIUS", 0,50,cvMinAreaRadius);
-    sysGui->addSlider("MAX AREA RADIUS",0,100,cvMaxAreaRadius);
-    sysGui->addSlider("THRESHOLD VALUE", 0, 100, cvThresholdValue);
+
+    sysGui->addLabel("CONTOUR PARAMS");
+    sysGui->addSlider("PERSISTANCE", 0,10,&cvPersistance);
+    sysGui->addSlider("MAXDISTANCE", 0,10,&cvMaxDistance);
+    sysGui->addSlider("MIN AREA RADIUS", 0,50,&cvMinAreaRadius);
+    sysGui->addSlider("MAX AREA RADIUS",0,100,&cvMaxAreaRadius);
+    sysGui->addSlider("THRESHOLD VALUE", 0, 100, &cvThresholdValue);
     sysGui->addButton("UPDATE CV PARAMS", false);
     sysGui->addButton("LOAD NEXT CLIP", false);
-    sysGui->addButton("PLAY CLIP", false);    
-    cout<<"here"<<endl;
+    sysGui->addButton("PLAY CLIP", false);
+    
+    sysGui->addLabel("OPTICAL FLOW PARAMS");
+    
+	sysGui->addSlider("PYRSCALE", .5, 0, &pyrScale);
+    sysGui->addSlider("LEVELS",  1, 8, &levels);
+	sysGui->addSlider("WINSIZE",  4, 64, &winsize);
+	sysGui->addSlider("ITERATIONS",1, 8, &iterations);
+	sysGui->addSlider("POLYN",5, 10, &polyN);
+	sysGui->addSlider("POLYSIGMA", 1.5, 1.1, &polySigma);
+	sysGui->addToggle("OPTFLOW_FARNEBACK_GAUSSIAN", useFarneback);
+	
+	sysGui->addSlider("WINSIZE", 4, 64, &winSize);
+	sysGui->addSlider("MAXLEVEL", 0, 8, &maxLevel);
+	
+	sysGui->addSlider("MAXFEATURES", 200, 1, 1000);
+	sysGui->addSlider("QUALITYLEVEL", 0.01, 0.001, .02);
+	sysGui->addSlider("MINDISTANCE", 4, 1, 16);
+    
+    sysGui->addSpacer();
+    sysGui->addButton("SAVE", false);
+    sysGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    ofxUIButton *loadbtn = gui->addButton("OPTICAL FLOW", false);
+    sysGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    ofxUIButton *updatebtn = gui->addToggle("CONTOUR TRACKING", &bUpdateSystem);
+    sysGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    sysGui->autoSizeToFitWidgets();
+    
+    
+    
     ofAddListener(sysGui->newGUIEvent, this, &CloudsVisionSystem::selfGuiEvent);
     
 }
 
 void CloudsVisionSystem::selfSetupRenderGui()
 {
-
+    
 }
 
 void CloudsVisionSystem::guiSystemEvent(ofxUIEventArgs &e)
@@ -126,21 +195,36 @@ void CloudsVisionSystem::selfKeyPressed(ofKeyEventArgs & args){
     
 }
 
-void CloudsVisionSystem::selfUpdate()
-{
-    if(currentPlayer.isPlaying() && currentPlayer.isLoaded()){
-        currentPlayer.update();
-        if(currentPlayer.isFrameNew() ){
-            background.update(currentPlayer, thresholded);
-            thresholded.update();
-            blur(thresholded, 10);
-            contourFinder.findContours(thresholded);
-            tracker.track(contourFinder.getBoundingRects());
+void CloudsVisionSystem::selfUpdate(){
+    player.update();
+    if(currentMode == ControurTracking){
+        if(player.isPlaying() && player.isLoaded()){
+            
+            if(player.isFrameNew() ){
+                background.update(player, thresholded);
+                thresholded.update();
+                blur(thresholded, 10);
+                contourFinder.findContours(thresholded);
+                tracker.track(contourFinder.getBoundingRects());
+            }
         }
+        
+    }
+    else if(currentMode == OpticalFlow){
+        
+        updateOpticalFlow();
     }
     
-
-
+    
+    if(useFarneback){
+        farneback.getAverageFlow();
+    }
+    else{
+        
+    }
+    
+    
+    
 }
 
 void CloudsVisionSystem::selfDraw()
@@ -172,10 +256,10 @@ void CloudsVisionSystem::selfDrawBackground()
     ofPushMatrix();
     ofTranslate(ofGetWidth()/2, ofGetHeight()/2);
     ofPushMatrix();
-    ofTranslate(-currentPlayer.getWidth()/2, -currentPlayer.getHeight()/2);
-    if(currentPlayer.isPlaying()){
-        currentPlayer.draw(0,0);
-        
+    ofTranslate(-player.getWidth()/2, -player.getHeight()/2);
+    
+    player.draw(0,0);
+    if(currentMode == ControurTracking){
         vector<Car>& followers = tracker.getFollowers();
         for(int i = 0; i < followers.size(); i++) {
             
@@ -186,7 +270,13 @@ void CloudsVisionSystem::selfDrawBackground()
             }
         }
     }
-
+    else if(currentMode == OpticalFlow){
+        curFlow->draw(0, 0);
+    }
+    
+    
+    
+    
     ofPopMatrix();
     ofPopMatrix();
 }
@@ -218,7 +308,7 @@ void CloudsVisionSystem::selfMouseMoved(ofMouseEventArgs& data)
 
 void CloudsVisionSystem::selfMousePressed(ofMouseEventArgs& data)
 {
-    cout<<data.x<<","<<data.y<<endl;
+    
 }
 
 void CloudsVisionSystem::selfMouseReleased(ofMouseEventArgs& data)
@@ -238,26 +328,19 @@ void CloudsVisionSystem::selfGuiEvent(ofxUIEventArgs &e)
     ofxUIButton* b = (ofxUIButton*) e.widget;
     if(name == "UPDATE CV PARAMS" &&  b->getValue() ){
         updateCVParameters();
-        cout<<"updating parameters";
+        cout<<"updating parameters"<<endl;
     }
-    else if (name == "LOAD NEXT CLIP" &&  b->getValue()){
-        
-        if(movieIndex == 0){
-            currentPlayer =player;
-            updateCVParameters();
-            movieIndex = 1;
-        }
-        else if (movieIndex){
-            currentPlayer = player2;
-            updateCVParameters();
-            movieIndex= 0;
-            
-        }
-
+    else if (name == "OPTICAL FLOW" &&  b->getValue()){
+        currentMode = OpticalFlow;
         
     }
-    else if( name == "PLAY CLIP" &&  b->getValue() ){
-        //player.play();
+    else if( name == "CONTOUR TRACKING" &&  b->getValue() ){
+        currentMode = ControurTracking;
+    }
+    else if (name == "OPTFLOW_FARNEBACK_GAUSSIAN" ){
+        
+        useFarneback = b->getValue();
+        cout<<"useFarneback : "<<useFarneback<<endl;
     }
     
     
