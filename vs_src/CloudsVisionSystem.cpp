@@ -15,20 +15,23 @@ string CloudsVisionSystem::getSystemName()
 void CloudsVisionSystem::selfSetup()
 {
     currentMode = OpticalFlow;
-    curFlow = &pyrLk;
+    curFlow = &farneback;
     movieIndex =0;
     pyrScale = 0.5;
     levels =4;
-    winsize = 8;    
+    winsize = 8;
     iterations =2;
     polyN = 7;
     polySigma = 1.5;
-    useFarneback = true;
     winSize =32;
     maxLevel =  3;
     maxFeatures = 200;
     qualityLevel = 0.01;
     minDistance = 4;
+    
+    useFarneback = true;
+    drawPlayer = true;
+    
     
     cvPersistance =3;
     cvMaxDistance = 80;
@@ -38,9 +41,12 @@ void CloudsVisionSystem::selfSetup()
     cvUpdateParameters = false;
     
     //	app
-    movieStrings.push_back("unionsq_1 - Wi-Fi.m4v");
-    movieStrings.push_back("indianTraffic.mov");
+        movieStrings.push_back("unionsq_1 - Wi-Fi.m4v");
     movieStrings.push_back("Road 2.mov");
+    movieStrings.push_back("unionsq_1_realtime 3.mp4");
+    movieStrings.push_back("traffic_1.mov");
+    movieStrings.push_back("indianTraffic.mov");
+
     
     ofSetVerticalSync(true);
 	ofBackground(0);
@@ -57,7 +63,20 @@ void CloudsVisionSystem::selfSetup()
     
     updateCVParameters();
     
-    
+    populateOpticalFlowRegions();
+}
+
+void CloudsVisionSystem::populateOpticalFlowRegions(){
+    int rectWidth =5;
+    int rectHeight = 5;
+    for( int j=0; j<player.getHeight(); j +=rectHeight){
+        for( int i=0; i<player.getWidth(); i += rectWidth){
+            //;
+            flowRegions.push_back(ofRectangle(i, j, rectWidth, rectHeight));
+            
+            
+        }
+    }
 }
 
 void CloudsVisionSystem::updateOpticalFlow(){
@@ -84,32 +103,28 @@ void CloudsVisionSystem::updateOpticalFlow(){
     
     //check it out that that you can use Flow polymorphically
     curFlow->calcOpticalFlow(player);
-
+    
 }
 
 void CloudsVisionSystem::updateCVParameters(){
     //  background subtraction
     background.setDifferenceMode(RunningBackground::ABSDIFF);
-    background.setLearningTime(15);
-    background.setThresholdValue(25);
+    background.setLearningTime(1);
+    background.setThresholdValue(128);
     
 	contourFinder.setMinAreaRadius(cvMinAreaRadius);
 	contourFinder.setMaxAreaRadius(cvMaxAreaRadius);
 	contourFinder.setThreshold(cvThresholdValue);
+//    contourFinder.setTargetColor(ofColor::yellow);
+    
     
     //how many frames before we give up on it
 	tracker.setPersistence(cvPersistance);
 	// an object can move up to 50 pixels per frame
 	tracker.setMaximumDistance(cvMaxDistance);
+//    tracker. 
     
-    
-    //TODO make it an up vector, not down vector
-    accumulator.setUpVector(ofVec2f(0.0,-1.0));
-    bounds.addVertex(0,0);
-    bounds.addVertex(player.getWidth(),0);
-    bounds.addVertex(player.getWidth(),player.getHeight());
-    bounds.addVertex(0,player.getHeight());
-    accumulator.setBounds(bounds);
+ 
     
     
     
@@ -138,16 +153,16 @@ void CloudsVisionSystem::selfExit()
 
 void CloudsVisionSystem::selfSetupSystemGui()
 {
-
-    sysGui->addLabel("CONTOUR PARAMS");
-    sysGui->addSlider("PERSISTANCE", 0,10,&cvPersistance);
-    sysGui->addSlider("MAXDISTANCE", 0,10,&cvMaxDistance);
+    
+    sysGui->addLabel("TRACKER PARAM");
+    sysGui->addSlider("PERSISTANCE", 0,100,&cvPersistance);
+    sysGui->addSlider("MAXDISTANCE", 0,100  ,&cvMaxDistance);
+    sysGui->addLabel("CONTOUR FINDER PARAMS");
     sysGui->addSlider("MIN AREA RADIUS", 0,50,&cvMinAreaRadius);
-    sysGui->addSlider("MAX AREA RADIUS",0,100,&cvMaxAreaRadius);
-    sysGui->addSlider("THRESHOLD VALUE", 0, 100, &cvThresholdValue);
+    sysGui->addSlider("MAX AREA RADIUS",0,255,&cvMaxAreaRadius);
+    sysGui->addSlider("THRESHOLD VALUE", 0, 255, &cvThresholdValue);
     sysGui->addButton("UPDATE CV PARAMS", false);
-    sysGui->addButton("LOAD NEXT CLIP", false);
-    sysGui->addButton("PLAY CLIP", false);
+
     
     sysGui->addLabel("OPTICAL FLOW PARAMS");
     
@@ -166,13 +181,6 @@ void CloudsVisionSystem::selfSetupSystemGui()
 	sysGui->addSlider("QUALITYLEVEL", 0.01, 0.001, .02);
 	sysGui->addSlider("MINDISTANCE", 4, 1, 16);
     
-    sysGui->addSpacer();
-    sysGui->addButton("SAVE", false);
-    sysGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    ofxUIButton *loadbtn = gui->addButton("OPTICAL FLOW", false);
-    sysGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    ofxUIButton *updatebtn = gui->addToggle("CONTOUR TRACKING", &bUpdateSystem);
-    sysGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     sysGui->autoSizeToFitWidgets();
     
     
@@ -184,6 +192,19 @@ void CloudsVisionSystem::selfSetupSystemGui()
 void CloudsVisionSystem::selfSetupRenderGui()
 {
     
+    rdrGui->addSpacer();
+    rdrGui->addLabel("CV MODES");
+    rdrGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    ofxUIButton *loadbtn = rdrGui->addButton("OPTICAL FLOW", false);
+    rdrGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    ofxUIButton *updatebtn = rdrGui->addToggle("CONTOUR TRACKING", false);
+    rdrGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    ofxUIButton *drawplayerbtn = rdrGui->addToggle("DRAW PLAYER", &drawPlayer);
+//    rdrGui->addButton("LOAD NEXT CLIP", false);
+//    rdrGui->addButton("PLAY CLIP", false);
+    rdrGui->autoSizeToFitWidgets();
+    ofAddListener(rdrGui->newGUIEvent, this, &CloudsVisionSystem::selfGuiEvent);
+
 }
 
 void CloudsVisionSystem::guiSystemEvent(ofxUIEventArgs &e)
@@ -209,19 +230,23 @@ void CloudsVisionSystem::selfUpdate(){
             }
         }
         
+        
     }
     else if(currentMode == OpticalFlow){
-        
         updateOpticalFlow();
+//        if(useFarneback){
+//            for(int i =0; i<flowRegions.size(); i++){
+//                flowMotion.push_back(farneback.getAverageFlowInRegion(flowRegions[i]));
+//            }
+//            
+//        }
+//        else{
+//            
+//        }
     }
     
     
-    if(useFarneback){
-        farneback.getAverageFlow();
-    }
-    else{
-        
-    }
+
     
     
     
@@ -253,32 +278,56 @@ void CloudsVisionSystem::selfAutoMode()
 
 void CloudsVisionSystem::selfDrawBackground()
 {
+    
     ofPushMatrix();
     ofTranslate(ofGetWidth()/2, ofGetHeight()/2);
     ofPushMatrix();
     ofTranslate(-player.getWidth()/2, -player.getHeight()/2);
     
-    player.draw(0,0);
+    if(drawPlayer){
+        player.draw(0,0);
+        
+    }
+
     if(currentMode == ControurTracking){
-        vector<Car>& followers = tracker.getFollowers();
+        contourFinder.draw();
+//        thresholded.draw(0,0, thresholded.width, thresholded.height);
+        vector<MyTracker>& followers = tracker.getFollowers();
+
         for(int i = 0; i < followers.size(); i++) {
-            
-            if(accumulator.isInBounds(followers[i].boundingBox, 0.05, 4)){
                 followers[i].draw();
-                followers[i].kill();
-                
-            }
+//                followers[i].kill();
         }
     }
+    
     else if(currentMode == OpticalFlow){
         curFlow->draw(0, 0);
+        
+        if(useFarneback){
+//            for(int i=0; i<flowRegions.size(); i++){
+//                ofPushStyle();
+//                ofNoFill();
+//                ofSetColor(255);
+//                //ofCircle(flowRegions[i].x, flowRegions[i].y, flowRegions[i].width);
+//                ofRect(flowRegions[i]);
+//                ofPopStyle();
+//                
+//            }
+//            for (int i=0; i<flowRegions.size(); i++) {
+//                ofLine(flowRegions [i].x,flowRegions[i].y,flowMotion[i].x,flowMotion[i].y);
+//            }
+        }
     }
     
     
     
     
+    
+    
     ofPopMatrix();
     ofPopMatrix();
+    
+    
 }
 
 void CloudsVisionSystem::selfDrawDebug()
@@ -331,16 +380,21 @@ void CloudsVisionSystem::selfGuiEvent(ofxUIEventArgs &e)
         cout<<"updating parameters"<<endl;
     }
     else if (name == "OPTICAL FLOW" &&  b->getValue()){
+        cout<<"setting mode to optical flow"<<endl;
         currentMode = OpticalFlow;
         
     }
     else if( name == "CONTOUR TRACKING" &&  b->getValue() ){
+        cout<<"setting mode to contour"<<endl;
         currentMode = ControurTracking;
     }
     else if (name == "OPTFLOW_FARNEBACK_GAUSSIAN" ){
         
         useFarneback = b->getValue();
-        cout<<"useFarneback : "<<useFarneback<<endl;
+        
+    }
+    else if (name == "DRAW PLAYER"){
+        drawPlayer = b->getValue();
     }
     
     

@@ -9,8 +9,7 @@
 
 #include "CloudsVisualSystem.h"
 #include "ofxCv.h"
-#include "CarAccumulator.h"
-#include "Car.h"
+#include "MyTracker.h"
 #include "ParkedCar.h"
 #include "Path.h"
 
@@ -65,17 +64,19 @@ protected:
     int movieIndex;
     vector<string> movieStrings;
     CVMode currentMode;
+    
     vector<ofRectangle> flowRegions;
+    void populateOpticalFlowRegions();
+    vector<ofVec2f> flowMotion;
+    
     
     //Contour tracking stuff
     ofxCv::ContourFinder contourFinder;
-	ofxCv::RectTrackerFollower<Car> tracker;
+	ofxCv::RectTrackerFollower<MyTracker> tracker;
     void updateCVParameters();
     ofImage thresholded;
     ofxCv::RunningBackground background;
-    CarAccumulator accumulator;
     cv::Rect accumRegion;
-    ofPolyline bounds;
     vector<ParkedCar> parked;
     
     
@@ -84,6 +85,8 @@ protected:
 	ofxCv::FlowPyrLK pyrLk;
 	ofxCv::Flow* curFlow;
     void updateOpticalFlow();
+    
+    bool drawPlayer;
     
     //OPTICAL FLOW PARAMETERS
     float pyrScale;

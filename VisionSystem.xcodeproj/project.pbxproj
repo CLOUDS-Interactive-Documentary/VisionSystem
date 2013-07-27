@@ -7,8 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		18EF2716179F573200374D31 /* Car.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EF270B179F573200374D31 /* Car.cpp */; };
-		18EF2717179F573200374D31 /* CarAccumulator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EF270D179F573200374D31 /* CarAccumulator.cpp */; };
+		18EF2716179F573200374D31 /* MyTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EF270B179F573200374D31 /* MyTracker.cpp */; };
 		18EF2718179F573200374D31 /* FlowField.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EF270F179F573200374D31 /* FlowField.cpp */; };
 		18EF271A179F573200374D31 /* ParkedCar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EF2712179F573200374D31 /* ParkedCar.cpp */; };
 		18EF271B179F573200374D31 /* Path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EF2714179F573200374D31 /* Path.cpp */; };
@@ -155,10 +154,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		18EF270B179F573200374D31 /* Car.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Car.cpp; sourceTree = "<group>"; };
-		18EF270C179F573200374D31 /* Car.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Car.h; sourceTree = "<group>"; };
-		18EF270D179F573200374D31 /* CarAccumulator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CarAccumulator.cpp; sourceTree = "<group>"; };
-		18EF270E179F573200374D31 /* CarAccumulator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CarAccumulator.h; sourceTree = "<group>"; };
+		18EF270B179F573200374D31 /* MyTracker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MyTracker.cpp; sourceTree = "<group>"; };
+		18EF270C179F573200374D31 /* MyTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyTracker.h; sourceTree = "<group>"; };
 		18EF270F179F573200374D31 /* FlowField.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FlowField.cpp; sourceTree = "<group>"; };
 		18EF2710179F573200374D31 /* FlowField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FlowField.h; sourceTree = "<group>"; };
 		18EF2712179F573200374D31 /* ParkedCar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParkedCar.cpp; sourceTree = "<group>"; };
@@ -1307,10 +1304,8 @@
 		3DA45C5F179DB6C3002EC0AC /* vs_src */ = {
 			isa = PBXGroup;
 			children = (
-				18EF270B179F573200374D31 /* Car.cpp */,
-				18EF270C179F573200374D31 /* Car.h */,
-				18EF270D179F573200374D31 /* CarAccumulator.cpp */,
-				18EF270E179F573200374D31 /* CarAccumulator.h */,
+				18EF270B179F573200374D31 /* MyTracker.cpp */,
+				18EF270C179F573200374D31 /* MyTracker.h */,
 				18EF270F179F573200374D31 /* FlowField.cpp */,
 				18EF2710179F573200374D31 /* FlowField.h */,
 				18EF2712179F573200374D31 /* ParkedCar.cpp */,
@@ -1750,8 +1745,7 @@
 				3DA460BC179EC5C2002EC0AC /* CloudsVisionSystem.cpp in Sources */,
 				3DA460C7179ED608002EC0AC /* CloudsRGBDCombinedRenderer.cpp in Sources */,
 				3DA460C8179ED608002EC0AC /* CloudsVisualSystem.cpp in Sources */,
-				18EF2716179F573200374D31 /* Car.cpp in Sources */,
-				18EF2717179F573200374D31 /* CarAccumulator.cpp in Sources */,
+				18EF2716179F573200374D31 /* MyTracker.cpp in Sources */,
 				18EF2718179F573200374D31 /* FlowField.cpp in Sources */,
 				18EF271A179F573200374D31 /* ParkedCar.cpp in Sources */,
 				18EF271B179F573200374D31 /* Path.cpp in Sources */,
