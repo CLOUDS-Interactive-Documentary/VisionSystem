@@ -6,22 +6,21 @@
 //
 //
 
-#include "Car.h"
+#include "MyTracker.h"
 using namespace cv;
 using namespace ofxCv;
 
 const float dyingTime = 1;
 
-void Car::setup(const cv::Rect& track) {
-
-   // cv::Rect test =     cv::Rect(track);
-	color.setHsb(ofRandom(0, 255), 255, 255);
+void MyTracker::setup(const cv::Rect& track) {
+    
+	//color.setHsb(ofRandom(0, 255), 255, 255);
 	cur = toOf(track).getCenter();
 	smooth = cur;
     boundingBox = cv::Rect(track.x,track.y,track.width,track.height);
 }
 
-void Car::update(const cv::Rect& track) {
+void MyTracker::update(const cv::Rect& track) {
     boundingBox.x = track.x;
     boundingBox.y = track.y;
     boundingBox.width = track.width;
@@ -31,7 +30,7 @@ void Car::update(const cv::Rect& track) {
 	all.addVertex(smooth);
 }
 
-void Car::kill() {
+void MyTracker::kill() {
 	float curTime = ofGetElapsedTimef();
 	if(startedDying == 0) {
 		startedDying = curTime;
@@ -40,7 +39,7 @@ void Car::kill() {
 	}
 }
 
-void Car::draw() {
+void MyTracker::draw() {
 	ofPushStyle();
 	float size = 16;
 	ofSetColor(255);
@@ -49,25 +48,26 @@ void Car::draw() {
 		size = ofMap(ofGetElapsedTimef() - startedDying, 0, dyingTime, size, 0, true);
 	}
 	ofNoFill();
-    ofCircle(cur, size);
-	ofSetColor(color);
-    ofCircle(boundingBox.x, boundingBox.y, size);
+	ofSetColor(129,192,87);
+    ofSetLineWidth(2);
+    ofRect(boundingBox.x, boundingBox.y, boundingBox.width, boundingBox.height);
 	all.draw();
 	ofSetColor(255);
+    
 	ofDrawBitmapString(ofToString(label), cur);
 	ofPopStyle();
 }
 
-ofPolyline Car::getLifeSpan(){
+ofPolyline MyTracker::getLifeSpan(){
     return all;
 }
-int Car::getLifeTime(){
+int MyTracker::getLifeTime(){
     return all.getVertices().size();
 }
 
 
 
-ofVec2f Car::getTangentAtPoint(int history){
+ofVec2f MyTracker::getTangentAtPoint(int history){
     //FIXME this function is written terribly and inneficiently
     
     //TODO find another way to make this safe

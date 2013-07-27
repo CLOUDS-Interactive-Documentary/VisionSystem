@@ -15,7 +15,7 @@
 
 
 
-class Car : public ofxCv::RectFollower {
+class MyTracker : public ofxCv::RectFollower {
 protected:
 	ofColor color;
 	ofVec3f cur, smooth;
@@ -23,7 +23,7 @@ protected:
 	ofPolyline all;
 
 public:
-	Car()
+	MyTracker()
 :startedDying(0) {
 	}
 	void setup(const cv::Rect& track);
