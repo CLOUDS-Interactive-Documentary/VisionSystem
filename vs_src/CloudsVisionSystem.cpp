@@ -31,7 +31,10 @@ void CloudsVisionSystem::selfSetup()
     
     useFarneback = true;
     drawPlayer = true;
+    drawThresholded =false;
     
+    learningTime = 15;
+    thresholdValue =128;
     
     cvPersistance =3;
     cvMaxDistance = 80;
@@ -39,11 +42,13 @@ void CloudsVisionSystem::selfSetup()
     cvMaxAreaRadius = 100;
     cvThresholdValue = 25;
     cvUpdateParameters = false;
+    lineWidth = 2;
     
     //	app
-        movieStrings.push_back("unionsq_1 - Wi-Fi.m4v");
-    movieStrings.push_back("Road 2.mov");
+    movieStrings.push_back("GreenPoint_bike.m4v");
     movieStrings.push_back("unionsq_1_realtime 3.mp4");
+    movieStrings.push_back("unionsq_1 - Wi-Fi.m4v");
+    movieStrings.push_back("Road 2.mov");
     movieStrings.push_back("traffic_1.mov");
     movieStrings.push_back("indianTraffic.mov");
 
@@ -58,23 +63,27 @@ void CloudsVisionSystem::selfSetup()
         
     }
     
-    
-    
-    
     updateCVParameters();
     
     populateOpticalFlowRegions();
 }
 
 void CloudsVisionSystem::populateOpticalFlowRegions(){
-    int rectWidth =5;
-    int rectHeight = 5;
+    int rectWidth =20;
+    int rectHeight = 20;
     for( int j=0; j<player.getHeight(); j +=rectHeight){
         for( int i=0; i<player.getWidth(); i += rectWidth){
             //;
+            if (i +rectWidth>player.width) {
+                rectWidth =player.width- i;
+            }
+            
+            if (j +rectHeight>player.height) {
+                rectHeight =player.height- j;
+            }
+            
+            
             flowRegions.push_back(ofRectangle(i, j, rectWidth, rectHeight));
-            
-            
         }
     }
 }
@@ -106,11 +115,14 @@ void CloudsVisionSystem::updateOpticalFlow(){
     
 }
 
+void CloudsVisionSystem::getTextures(){
+    
+}
 void CloudsVisionSystem::updateCVParameters(){
     //  background subtraction
     background.setDifferenceMode(RunningBackground::ABSDIFF);
-    background.setLearningTime(1);
-    background.setThresholdValue(128);
+    background.setLearningTime(learningTime);
+    background.setThresholdValue(thresholdValue);
     
 	contourFinder.setMinAreaRadius(cvMinAreaRadius);
 	contourFinder.setMaxAreaRadius(cvMaxAreaRadius);
@@ -124,21 +136,15 @@ void CloudsVisionSystem::updateCVParameters(){
 	tracker.setMaximumDistance(cvMaxDistance);
 //    tracker. 
     
- 
-    
-    
-    
-    
 }
+
 void CloudsVisionSystem::selfPresetLoaded(string presetPath){
 	
 }
 
 void CloudsVisionSystem::selfBegin()
 {
-    
-    
-    
+
 }
 
 void CloudsVisionSystem::selfEnd()
@@ -153,10 +159,14 @@ void CloudsVisionSystem::selfExit()
 
 void CloudsVisionSystem::selfSetupSystemGui()
 {
+    sysGui->addLabel("BACKGROUND PARAM");
+    sysGui->addSlider("LEARNING TIME", 0,100,&learningTime);
+    sysGui->addSlider("THRESHOLD VALUE", 0,255  ,&thresholdValue);
     
     sysGui->addLabel("TRACKER PARAM");
     sysGui->addSlider("PERSISTANCE", 0,100,&cvPersistance);
     sysGui->addSlider("MAXDISTANCE", 0,100  ,&cvMaxDistance);
+
     sysGui->addLabel("CONTOUR FINDER PARAMS");
     sysGui->addSlider("MIN AREA RADIUS", 0,50,&cvMinAreaRadius);
     sysGui->addSlider("MAX AREA RADIUS",0,255,&cvMaxAreaRadius);
@@ -177,13 +187,11 @@ void CloudsVisionSystem::selfSetupSystemGui()
 	sysGui->addSlider("WINSIZE", 4, 64, &winSize);
 	sysGui->addSlider("MAXLEVEL", 0, 8, &maxLevel);
 	
-	sysGui->addSlider("MAXFEATURES", 200, 1, 1000);
-	sysGui->addSlider("QUALITYLEVEL", 0.01, 0.001, .02);
-	sysGui->addSlider("MINDISTANCE", 4, 1, 16);
+	sysGui->addSlider("MAXFEATURES", 200, 1, &maxFeatures);
+	sysGui->addSlider("QUALITYLEVEL", 0.01, 0.001, &qualityLevel);
+	sysGui->addSlider("MINDISTANCE", 4, 1, &minDistance);
     
     sysGui->autoSizeToFitWidgets();
-    
-    
     
     ofAddListener(sysGui->newGUIEvent, this, &CloudsVisionSystem::selfGuiEvent);
     
@@ -194,12 +202,15 @@ void CloudsVisionSystem::selfSetupRenderGui()
     
     rdrGui->addSpacer();
     rdrGui->addLabel("CV MODES");
-    rdrGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    rdrGui->addSlider("BOX LINE WIDTH", 1, 10, &lineWidth);
+    rdrGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);;
     ofxUIButton *loadbtn = rdrGui->addButton("OPTICAL FLOW", false);
-    rdrGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    ofxUIButton *updatebtn = rdrGui->addToggle("CONTOUR TRACKING", false);
     rdrGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    ofxUIButton *updatebtn = rdrGui->addToggle("CONTOUR TRACKING", false);
+    rdrGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     ofxUIButton *drawplayerbtn = rdrGui->addToggle("DRAW PLAYER", &drawPlayer);
+    rdrGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    ofxUIButton *drawthresholdedbtn = rdrGui->addToggle("DRAW THRESHOLDED", &drawThresholded);
 //    rdrGui->addButton("LOAD NEXT CLIP", false);
 //    rdrGui->addButton("PLAY CLIP", false);
     rdrGui->autoSizeToFitWidgets();
@@ -224,7 +235,7 @@ void CloudsVisionSystem::selfUpdate(){
             if(player.isFrameNew() ){
                 background.update(player, thresholded);
                 thresholded.update();
-                blur(thresholded, 10);
+                blur(thresholded, 5);
                 contourFinder.findContours(thresholded);
                 tracker.track(contourFinder.getBoundingRects());
             }
@@ -234,23 +245,26 @@ void CloudsVisionSystem::selfUpdate(){
     }
     else if(currentMode == OpticalFlow){
         updateOpticalFlow();
-//        if(useFarneback){
-//            for(int i =0; i<flowRegions.size(); i++){
-//                flowMotion.push_back(farneback.getAverageFlowInRegion(flowRegions[i]));
+        if(useFarneback){
+            
+//            if(farneback.getTotalFlow()){
+//                for(int i =0; i<flowRegions.size(); i++){
+//                    flowMotion.push_back(farneback.getAverageFlowInRegion(flowRegions[0]));
+//                }
 //            }
-//            
-//        }
-//        else{
-//            
-//        }
-    }
-    
-    
 
-    
-    
-    
+            
+            averageFlow =farneback.getTotalFlow();
+            
+        }
+        else{
+            
+        }
+        
+        
+    }
 }
+
 
 void CloudsVisionSystem::selfDraw()
 {
@@ -288,14 +302,17 @@ void CloudsVisionSystem::selfDrawBackground()
         player.draw(0,0);
         
     }
+    if(drawThresholded){
+        thresholded.draw(0,0, thresholded.width, thresholded.height);
+    }
 
     if(currentMode == ControurTracking){
         contourFinder.draw();
-//        thresholded.draw(0,0, thresholded.width, thresholded.height);
+        
         vector<MyTracker>& followers = tracker.getFollowers();
 
         for(int i = 0; i < followers.size(); i++) {
-                followers[i].draw();
+                followers[i].draw(lineWidth);
 //                followers[i].kill();
         }
     }
@@ -304,25 +321,21 @@ void CloudsVisionSystem::selfDrawBackground()
         curFlow->draw(0, 0);
         
         if(useFarneback){
-//            for(int i=0; i<flowRegions.size(); i++){
-//                ofPushStyle();
-//                ofNoFill();
-//                ofSetColor(255);
-//                //ofCircle(flowRegions[i].x, flowRegions[i].y, flowRegions[i].width);
-//                ofRect(flowRegions[i]);
-//                ofPopStyle();
-//                
-//            }
+            for(int i=0; i<flowRegions.size(); i++){
+                ofPushStyle();
+                ofNoFill();
+                ofSetColor(255);
+                //ofCircle(flowRegions[i].x, flowRegions[i].y, flowRegions[i].width);
+                ofRect(flowRegions[i]);
+                ofPopStyle();
+                ofLine(player.getWidth()/2, player.getHeight(), ofClamp(averageFlow.x, 0, player.getWidth()) , ofClamp(averageFlow.y, 0, player.getHeight()));
+                
+            }
 //            for (int i=0; i<flowRegions.size(); i++) {
 //                ofLine(flowRegions [i].x,flowRegions[i].y,flowMotion[i].x,flowMotion[i].y);
 //            }
         }
     }
-    
-    
-    
-    
-    
     
     ofPopMatrix();
     ofPopMatrix();
@@ -395,6 +408,9 @@ void CloudsVisionSystem::selfGuiEvent(ofxUIEventArgs &e)
     }
     else if (name == "DRAW PLAYER"){
         drawPlayer = b->getValue();
+    }
+    else if( name == "DRAW THRESHOLDED"){
+        drawThresholded = b->getValue();
     }
     
     

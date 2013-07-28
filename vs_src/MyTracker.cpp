@@ -14,7 +14,8 @@ const float dyingTime = 1;
 
 void MyTracker::setup(const cv::Rect& track) {
     
-	//color.setHsb(ofRandom(0, 255), 255, 255);
+	color.set(129, 192, 87);
+
 	cur = toOf(track).getCenter();
 	smooth = cur;
     boundingBox = cv::Rect(track.x,track.y,track.width,track.height);
@@ -39,7 +40,7 @@ void MyTracker::kill() {
 	}
 }
 
-void MyTracker::draw() {
+void MyTracker::draw(float lineWidth) {
 	ofPushStyle();
 	float size = 16;
 	ofSetColor(255);
@@ -49,7 +50,7 @@ void MyTracker::draw() {
 	}
 	ofNoFill();
 	ofSetColor(129,192,87);
-    ofSetLineWidth(2);
+    ofSetLineWidth((int)lineWidth);
     ofRect(boundingBox.x, boundingBox.y, boundingBox.width, boundingBox.height);
 	all.draw();
 	ofSetColor(255);

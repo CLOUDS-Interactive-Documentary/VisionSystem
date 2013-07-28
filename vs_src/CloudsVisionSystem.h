@@ -87,7 +87,11 @@ protected:
     void updateOpticalFlow();
     
     bool drawPlayer;
+    bool drawThresholded;
     
+    ofVec2f averageFlow;
+    
+    ofFbo fbo;
     //OPTICAL FLOW PARAMETERS
     float pyrScale;
     float levels;
@@ -110,7 +114,10 @@ protected:
     float cvMaxAreaRadius;
     float cvThresholdValue;
     bool cvUpdateParameters;
+    float lineWidth;
     
+    float learningTime;
+    float thresholdValue;
     
     
 };
