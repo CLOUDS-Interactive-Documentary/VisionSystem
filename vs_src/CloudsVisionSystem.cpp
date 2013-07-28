@@ -7,6 +7,7 @@
 
 #include "CloudsVisionSystem.h"
 using namespace ofxCv;
+using namespace cv;
 string CloudsVisionSystem::getSystemName()
 {
 	return "CloudssVisionSystem";
@@ -32,6 +33,7 @@ void CloudsVisionSystem::selfSetup()
     useFarneback = true;
     drawPlayer = true;
     drawThresholded =false;
+
     
     learningTime = 15;
     thresholdValue =128;
@@ -44,14 +46,16 @@ void CloudsVisionSystem::selfSetup()
     cvUpdateParameters = false;
     lineWidth = 2;
     
+    
     //	app
-    movieStrings.push_back("GreenPoint_bike.m4v");
+    movieStrings.push_back("Swarm_EindhovenTest_Watec_two-visitors.mov");
     movieStrings.push_back("unionsq_1_realtime 3.mp4");
     movieStrings.push_back("unionsq_1 - Wi-Fi.m4v");
+    movieStrings.push_back("GreenPoint_bike.m4v");
     movieStrings.push_back("Road 2.mov");
     movieStrings.push_back("traffic_1.mov");
     movieStrings.push_back("indianTraffic.mov");
-
+    
     
     ofSetVerticalSync(true);
 	ofBackground(0);
@@ -63,9 +67,25 @@ void CloudsVisionSystem::selfSetup()
         
     }
     
+    imitate(previous, player);
+	imitate(diff, player);
+//    imitate(accumulation, player);
+    accumulation.allocate(player.width, player.height, OF_IMAGE_COLOR);
+    
+    clearAccumulation();
+    
     updateCVParameters();
     
     populateOpticalFlowRegions();
+}
+
+void CloudsVisionSystem::clearAccumulation(){
+    for(int j=0; j<accumulation.height; j++){
+        for( int i=0; i<accumulation.width; i++){
+            
+            accumulation.setColor(i, j, ofFloatColor(0));
+        }
+    }
 }
 
 void CloudsVisionSystem::populateOpticalFlowRegions(){
@@ -74,12 +94,12 @@ void CloudsVisionSystem::populateOpticalFlowRegions(){
     for( int j=0; j<player.getHeight(); j +=rectHeight){
         for( int i=0; i<player.getWidth(); i += rectWidth){
             //;
-            if (i +rectWidth>player.width) {
-                rectWidth =player.width- i;
+            if (i +rectWidth -1>player.width) {
+                rectWidth =player.width- i +1;
             }
             
-            if (j +rectHeight>player.height) {
-                rectHeight =player.height- j;
+            if (j +rectHeight -1>player.height) {
+                rectHeight =player.height- j +1;
             }
             
             
@@ -116,6 +136,8 @@ void CloudsVisionSystem::updateOpticalFlow(){
 }
 
 void CloudsVisionSystem::getTextures(){
+    vector<MyTracker>& followers = tracker.getFollowers();
+    
     
 }
 void CloudsVisionSystem::updateCVParameters(){
@@ -127,14 +149,14 @@ void CloudsVisionSystem::updateCVParameters(){
 	contourFinder.setMinAreaRadius(cvMinAreaRadius);
 	contourFinder.setMaxAreaRadius(cvMaxAreaRadius);
 	contourFinder.setThreshold(cvThresholdValue);
-//    contourFinder.setTargetColor(ofColor::yellow);
+    //    contourFinder.setTargetColor(ofColor::yellow);
     
     
     //how many frames before we give up on it
 	tracker.setPersistence(cvPersistance);
 	// an object can move up to 50 pixels per frame
 	tracker.setMaximumDistance(cvMaxDistance);
-//    tracker. 
+    //    tracker.
     
 }
 
@@ -144,7 +166,7 @@ void CloudsVisionSystem::selfPresetLoaded(string presetPath){
 
 void CloudsVisionSystem::selfBegin()
 {
-
+    
 }
 
 void CloudsVisionSystem::selfEnd()
@@ -166,13 +188,13 @@ void CloudsVisionSystem::selfSetupSystemGui()
     sysGui->addLabel("TRACKER PARAM");
     sysGui->addSlider("PERSISTANCE", 0,100,&cvPersistance);
     sysGui->addSlider("MAXDISTANCE", 0,100  ,&cvMaxDistance);
-
+    
     sysGui->addLabel("CONTOUR FINDER PARAMS");
     sysGui->addSlider("MIN AREA RADIUS", 0,50,&cvMinAreaRadius);
     sysGui->addSlider("MAX AREA RADIUS",0,255,&cvMaxAreaRadius);
     sysGui->addSlider("THRESHOLD VALUE", 0, 255, &cvThresholdValue);
     sysGui->addButton("UPDATE CV PARAMS", false);
-
+    
     
     sysGui->addLabel("OPTICAL FLOW PARAMS");
     
@@ -211,11 +233,15 @@ void CloudsVisionSystem::selfSetupRenderGui()
     ofxUIButton *drawplayerbtn = rdrGui->addToggle("DRAW PLAYER", &drawPlayer);
     rdrGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     ofxUIButton *drawthresholdedbtn = rdrGui->addToggle("DRAW THRESHOLDED", &drawThresholded);
-//    rdrGui->addButton("LOAD NEXT CLIP", false);
-//    rdrGui->addButton("PLAY CLIP", false);
+    rdrGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    ofxUIButton *diffbtn = rdrGui->addToggle("DRAW DIFF", &drawDiff);
+    rdrGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    ofxUIButton *clearthresholdbtn = rdrGui->addToggle("CLEAR DIFF", false);
+    //    rdrGui->addButton("LOAD NEXT CLIP", false);
+    //    rdrGui->addButton("PLAY CLIP", false);
     rdrGui->autoSizeToFitWidgets();
     ofAddListener(rdrGui->newGUIEvent, this, &CloudsVisionSystem::selfGuiEvent);
-
+    
 }
 
 void CloudsVisionSystem::guiSystemEvent(ofxUIEventArgs &e)
@@ -247,21 +273,71 @@ void CloudsVisionSystem::selfUpdate(){
         updateOpticalFlow();
         if(useFarneback){
             
-//            if(farneback.getTotalFlow()){
-//                for(int i =0; i<flowRegions.size(); i++){
-//                    flowMotion.push_back(farneback.getAverageFlowInRegion(flowRegions[0]));
-//                }
-//            }
+            //                for(int i =0; i<flowRegions.size(); i++){
+            //                    flowMotion.push_back(farneback.getAverageFlowInRegion(ofRectangle(flowRegions[i].y,flowRegions[i].x,flowRegions[i].height,flowRegions[i].width)));
+            //                }
+            //
+            //
+            //            averageFlow =farneback.getTotalFlow();
+            //
+            //        }
+            //        else{
+            //
+            //        }
+            
+        }
+    }
+    else if(currentMode == HeatMap){
+     	if(player.isFrameNew()) {
+            // take the absolute difference of prev and cam and save it inside diff
+            absdiff(previous, player, diff);
+            diff.update();
+            
+            // like ofSetPixels, but more concise and cross-toolkit
+            copy(player, previous);
+            
+            if(accumVector.size() < 4){
+                accumVector.push_back(diff);
+            }
+            
+            else{
+                for(int j=0; j<accumulation.height; j++){
+                    for( int i=0; i<accumulation.width; i++){
+                        vector<ofFloatColor> colors;
+                        for (auto acuIt = accumVector.begin(); acuIt != accumVector.end(); ++acuIt) {
+                            colors.push_back(acuIt->getPixelsRef().getColor(i, j));
+                        }
+                        
+                        //ofFloatColor c;
+                        //float value = 0;
+                        //for(int i =0 ; i< colors.size(); i++){
+                           // value = i;
+                           // value = ofMap(value, 0, colors.size(), 0.1, 0.5);
+                            //c += colors[i] -value;
+//cout<<i<<":"<<value<<endl;
+
+                        //}
+                        ofFloatColor c = colors[0] - 0.8 + colors[1] - 0.6 + colors[2] - 0.4 + colors[3] - 0.2;
+                        accumulation.setColor(i, j, c);
+                    }
+                }
+                
+                while(accumVector.size()> 3){
+                    accumVector.pop_front();
+                }
+                
+                
+                
+            }
+            
 
             
-            averageFlow =farneback.getTotalFlow();
+            accumulation.reloadTexture();
+            //            acculmulation.getPixelsRef();
+            // mean() returns a Scalar. it's a cv:: function so we have to pass a Mat
+            //            diffMean = mean(toCv(diff));
             
         }
-        else{
-            
-        }
-        
-        
     }
 }
 
@@ -305,36 +381,52 @@ void CloudsVisionSystem::selfDrawBackground()
     if(drawThresholded){
         thresholded.draw(0,0, thresholded.width, thresholded.height);
     }
-
+    
     if(currentMode == ControurTracking){
         contourFinder.draw();
         
         vector<MyTracker>& followers = tracker.getFollowers();
-
+        
         for(int i = 0; i < followers.size(); i++) {
-                followers[i].draw(lineWidth);
-//                followers[i].kill();
+            followers[i].draw(lineWidth);
+            //                followers[i].kill();
+            ofImage tex = player.getPixelsRef();
+            tex.cropFrom(tex, followers[i].boundingBox.x, followers[i].boundingBox.y, followers[i].boundingBox.width, followers[i].boundingBox.height);
+            //            ofMesh m;
+            //            ofRectangle r = toOf(followers[i].boundingBox);
+            //            m.addTexCoord(r.getTopLeft());
+            //            m.addTexCoord(r.getTopRight());
+            //            m.addTexCoord(r.getBottomRight());
+            //            m.addTexCoord(r.getBottomLeft());
+            //            fbo.begin();
+            //            m.bind
+            
         }
+        
     }
-    
     else if(currentMode == OpticalFlow){
         curFlow->draw(0, 0);
         
         if(useFarneback){
-            for(int i=0; i<flowRegions.size(); i++){
-                ofPushStyle();
-                ofNoFill();
-                ofSetColor(255);
-                //ofCircle(flowRegions[i].x, flowRegions[i].y, flowRegions[i].width);
-                ofRect(flowRegions[i]);
-                ofPopStyle();
-                ofLine(player.getWidth()/2, player.getHeight(), ofClamp(averageFlow.x, 0, player.getWidth()) , ofClamp(averageFlow.y, 0, player.getHeight()));
-                
-            }
-//            for (int i=0; i<flowRegions.size(); i++) {
-//                ofLine(flowRegions [i].x,flowRegions[i].y,flowMotion[i].x,flowMotion[i].y);
-//            }
+            //            for(int i=0; i<flowRegions.size(); i++){
+            //                ofPushStyle();
+            //                ofNoFill();
+            //                ofSetColor(255);
+            //                //ofCircle(flowRegions[i].x, flowRegions[i].y, flowRegions[i].width);
+            //                ofRect(flowRegions[i]);
+            //                ofPopStyle();
+            //                ofLine(player.getWidth()/2, player.getHeight(), ofClamp(averageFlow.x, 0, player.getWidth()) , ofClamp(averageFlow.y, 0, player.getHeight()));
+            //
+            //            }
+            
+            //            for (int i=0; i<flowRegions.size(); i++)
+            //            {
+            //                ofLine(flowRegions[i].getCenter(),flowRegions[i].getCenter()+flowMotion[i]);
+            //            }
         }
+    }
+    else if(currentMode == HeatMap){
+        accumulation.draw(0, 0);
     }
     
     ofPopMatrix();
@@ -408,9 +500,22 @@ void CloudsVisionSystem::selfGuiEvent(ofxUIEventArgs &e)
     }
     else if (name == "DRAW PLAYER"){
         drawPlayer = b->getValue();
+        drawThresholded = false;
+        drawDiff = false;
     }
     else if( name == "DRAW THRESHOLDED"){
         drawThresholded = b->getValue();
+        drawPlayer =false;
+        drawDiff = false;
+    }
+    else if( name == "DRAW DIFF"){
+        currentMode = HeatMap;
+        drawDiff = b->getValue();
+        drawThresholded = false;
+        drawPlayer =false;
+    }
+    else if( name == "CLEAR DIFF"){
+        clearAccumulation();
     }
     
     

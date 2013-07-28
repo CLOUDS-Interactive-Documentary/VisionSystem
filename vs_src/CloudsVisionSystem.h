@@ -15,7 +15,8 @@
 
 typedef enum{
     OpticalFlow =0,
-    ControurTracking
+    ControurTracking,
+    HeatMap
 
 }CVMode;
 
@@ -55,7 +56,8 @@ public:
     
     void selfSetupRenderGui();
     void guiRenderEvent(ofxUIEventArgs &e);
-    
+    void getTextures();
+
 protected:
     
     //video player stuff
@@ -69,6 +71,9 @@ protected:
     void populateOpticalFlowRegions();
     vector<ofVec2f> flowMotion;
     
+    ofImage accumulation;
+    ofImage diff;
+    ofImage previous;
     
     //Contour tracking stuff
     ofxCv::ContourFinder contourFinder;
@@ -79,19 +84,20 @@ protected:
     cv::Rect accumRegion;
     vector<ParkedCar> parked;
     
-    
     //Optical flow types
     ofxCv::FlowFarneback farneback;
 	ofxCv::FlowPyrLK pyrLk;
 	ofxCv::Flow* curFlow;
     void updateOpticalFlow();
-    
+    void clearAccumulation();
+    list<ofImage> accumVector;
     bool drawPlayer;
     bool drawThresholded;
+    bool drawDiff;
     
     ofVec2f averageFlow;
-    
     ofFbo fbo;
+    
     //OPTICAL FLOW PARAMETERS
     float pyrScale;
     float levels;
