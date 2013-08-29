@@ -8,6 +8,7 @@
 #include "CloudsVisionSystem.h"
 using namespace ofxCv;
 using namespace cv;
+
 string CloudsVisionSystem::getSystemName()
 {
 	return "CloudssVisionSystem";
@@ -48,10 +49,11 @@ void CloudsVisionSystem::selfSetup()
     
     
     //	app
-    movieStrings.push_back("Swarm_EindhovenTest_Watec_two-visitors.mov");
-    movieStrings.push_back("unionsq_1_realtime 3.mp4");
+        movieStrings.push_back("unionsq_1_realtime 3.mp4");
+        movieStrings.push_back("GreenPoint_bike.m4v");
     movieStrings.push_back("unionsq_1 - Wi-Fi.m4v");
-    movieStrings.push_back("GreenPoint_bike.m4v");
+
+    movieStrings.push_back("Swarm_EindhovenTest_Watec_two-visitors.mov");
     movieStrings.push_back("Road 2.mov");
     movieStrings.push_back("traffic_1.mov");
     movieStrings.push_back("indianTraffic.mov");
@@ -290,47 +292,45 @@ void CloudsVisionSystem::selfUpdate(){
     else if(currentMode == HeatMap){
      	if(player.isFrameNew()) {
             // take the absolute difference of prev and cam and save it inside diff
+            toCv(accumulation) += toCv(previous) -toCv(player) ;
             absdiff(previous, player, diff);
             diff.update();
             
             // like ofSetPixels, but more concise and cross-toolkit
             copy(player, previous);
-            
-            if(accumVector.size() < 4){
-                accumVector.push_back(diff);
-            }
-            
-            else{
-                for(int j=0; j<accumulation.height; j++){
-                    for( int i=0; i<accumulation.width; i++){
-                        vector<ofFloatColor> colors;
-                        for (auto acuIt = accumVector.begin(); acuIt != accumVector.end(); ++acuIt) {
-                            colors.push_back(acuIt->getPixelsRef().getColor(i, j));
-                        }
-                        
-                        //ofFloatColor c;
-                        //float value = 0;
-                        //for(int i =0 ; i< colors.size(); i++){
-                           // value = i;
-                           // value = ofMap(value, 0, colors.size(), 0.1, 0.5);
-                            //c += colors[i] -value;
-//cout<<i<<":"<<value<<endl;
 
-                        //}
-                        ofFloatColor c = colors[0] - 0.8 + colors[1] - 0.6 + colors[2] - 0.4 + colors[3] - 0.2;
-                        accumulation.setColor(i, j, c);
-                    }
-                }
-                
-                while(accumVector.size()> 3){
-                    accumVector.pop_front();
-                }
-                
-                
-                
-            }
+//            if(accumVector.size() < 4){
+//                accumVector.push_back(diff);
+//            }
+//            
+//            else{
+////                for(int j=0; j<accumulation.height; j++){
+////                    for( int i=0; i<accumulation.width; i++){
+////                        vector<ofFloatColor> colors;
+////                        for (auto acuIt = accumVector.begin(); acuIt != accumVector.end(); acuIt++) {
+////                            colors.push_back(acuIt->getPixelsRef().getColor(i, j));
+////                        }
+////
+////                        ofFloatColor c0 = colors[0]-0.8;
+////                        ofFloatColor c1 =colors[1]-0.6;
+////                        ofFloatColor c2 =colors[2]-0.4;
+////                        ofFloatColor c3 = colors[3]-0.2;
+////                        
+////                        ofFloatColor c = c0+c1+c2+c3;
+////                        accumulation.setColor(i, j, c);
+////                    }
+////                }
+//                
+//                toCv(accumulation) += toCv(previous) -toCv(player) ;
+//                while(accumVector.size()> 3){
+//                    accumVector.pop_front();
+//                }
+//                
+//                
+//                
+//            }
             
-
+//            cout<<ofGetFrameRate()<<endl;
             
             accumulation.reloadTexture();
             //            acculmulation.getPixelsRef();
@@ -408,17 +408,17 @@ void CloudsVisionSystem::selfDrawBackground()
         curFlow->draw(0, 0);
         
         if(useFarneback){
-            //            for(int i=0; i<flowRegions.size(); i++){
-            //                ofPushStyle();
-            //                ofNoFill();
-            //                ofSetColor(255);
-            //                //ofCircle(flowRegions[i].x, flowRegions[i].y, flowRegions[i].width);
-            //                ofRect(flowRegions[i]);
-            //                ofPopStyle();
-            //                ofLine(player.getWidth()/2, player.getHeight(), ofClamp(averageFlow.x, 0, player.getWidth()) , ofClamp(averageFlow.y, 0, player.getHeight()));
-            //
-            //            }
-            
+          for(int i=0; i<flowRegions.size(); i++){
+              ofPushStyle();
+              ofNoFill();
+              ofSetColor(255);
+              //ofCircle(flowRegions[i].x, flowRegions[i].y, flowRegions[i].width);
+              ofRect(flowRegions[i]);
+              ofPopStyle();
+             // ofLine(player.getWidth()/2, player.getHeight(), ofClamp(averageFlow.x, 0, player.getWidth()) , ofClamp(averageFlow.y, 0, player.getHeight()));
+
+          }
+
             //            for (int i=0; i<flowRegions.size(); i++)
             //            {
             //                ofLine(flowRegions[i].getCenter(),flowRegions[i].getCenter()+flowMotion[i]);
@@ -426,7 +426,7 @@ void CloudsVisionSystem::selfDrawBackground()
         }
     }
     else if(currentMode == HeatMap){
-        accumulation.draw(0, 0);
+        diff.draw(0, 0);
     }
     
     ofPopMatrix();
