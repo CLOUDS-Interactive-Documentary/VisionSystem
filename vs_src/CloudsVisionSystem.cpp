@@ -34,7 +34,7 @@ void CloudsVisionSystem::selfSetup()
     useFarneback = true;
     drawPlayer = true;
     drawThresholded =false;
-
+    
     
     learningTime = 15;
     thresholdValue =128;
@@ -47,13 +47,13 @@ void CloudsVisionSystem::selfSetup()
     cvUpdateParameters = false;
     lineWidth = 2;
     
+    accumulationCount =0;
     
     //	app
-        movieStrings.push_back("unionsq_1_realtime 3.mp4");
-        movieStrings.push_back("GreenPoint_bike.m4v");
-    movieStrings.push_back("unionsq_1 - Wi-Fi.m4v");
-
+    movieStrings.push_back("GreenPoint_bike.m4v");
     movieStrings.push_back("Swarm_EindhovenTest_Watec_two-visitors.mov");
+    movieStrings.push_back("unionsq_1 - Wi-Fi.m4v");
+    movieStrings.push_back("unionsq_1_realtime 3.mp4");
     movieStrings.push_back("Road 2.mov");
     movieStrings.push_back("traffic_1.mov");
     movieStrings.push_back("indianTraffic.mov");
@@ -71,7 +71,7 @@ void CloudsVisionSystem::selfSetup()
     
     imitate(previous, player);
 	imitate(diff, player);
-//    imitate(accumulation, player);
+    //    imitate(accumulation, player);
     accumulation.allocate(player.width, player.height, OF_IMAGE_COLOR);
     
     clearAccumulation();
@@ -291,53 +291,71 @@ void CloudsVisionSystem::selfUpdate(){
     }
     else if(currentMode == HeatMap){
      	if(player.isFrameNew()) {
+            accumulationCount++;
             // take the absolute difference of prev and cam and save it inside diff
-            toCv(accumulation) += toCv(previous) -toCv(player) ;
+
+                
+            toCv(accumulation) = toCv(previous) -toCv(player) ;
             absdiff(previous, player, diff);
+            for(int i =0; i< diff.width; i++ ){
+                for(int j =0; j<diff.height; j++){
+                    ofColor c = diff.getColor(i, j);
+                    float b = c.getBrightness();
+                    
+                    if(b > 40 ){
+                        float scaledHue = ofMap(b ,0, 255, ofFloatColor::blue.getHue(), ofFloatColor::red.getHue());
+                        ofFloatColor magnitudeColor = ofFloatColor::fromHsb(scaledHue, 200, 200) ;
+                        diff.setColor(i, j, magnitudeColor);
+                    }
+                    
+                    
+                }
+            }
             diff.update();
             
             // like ofSetPixels, but more concise and cross-toolkit
             copy(player, previous);
+            
 
-//            if(accumVector.size() < 4){
-//                accumVector.push_back(diff);
-//            }
-//            
-//            else{
-////                for(int j=0; j<accumulation.height; j++){
-////                    for( int i=0; i<accumulation.width; i++){
-////                        vector<ofFloatColor> colors;
-////                        for (auto acuIt = accumVector.begin(); acuIt != accumVector.end(); acuIt++) {
-////                            colors.push_back(acuIt->getPixelsRef().getColor(i, j));
-////                        }
-////
-////                        ofFloatColor c0 = colors[0]-0.8;
-////                        ofFloatColor c1 =colors[1]-0.6;
-////                        ofFloatColor c2 =colors[2]-0.4;
-////                        ofFloatColor c3 = colors[3]-0.2;
-////                        
-////                        ofFloatColor c = c0+c1+c2+c3;
-////                        accumulation.setColor(i, j, c);
-////                    }
-////                }
-//                
-//                toCv(accumulation) += toCv(previous) -toCv(player) ;
-//                while(accumVector.size()> 3){
-//                    accumVector.pop_front();
-//                }
-//                
-//                
-//                
-//            }
+            //            ofSetColor(magnitudeColor);
+            for(int i =0; i< accumulation.width; i++ ){
+                for(int j =0; j<accumulation.height; j++){
+                    
+//                    if(! (accumulationCount%2) ){
+//                        accumulation.setColor(i, j, ofColor::black);
+//                        accumulationCount =0;
+//
+//                    }
+//                    
+//                    else{
+                        ofColor c = accumulation.getColor(i, j);
+                        float b = c.getBrightness();
+                        
+                        
+                        if(b > 50 ){
+                            float scaledHue = ofMap(b ,0, 255, ofFloatColor::blue.getHue(), ofFloatColor::orange.getHue());
+                            ofFloatColor magnitudeColor = ofFloatColor::fromHsb(scaledHue, 200, 200) ;
+                            accumulation.setColor(i, j, magnitudeColor);
+                        }
+                        
+//                    }
+                    
+
+
+                }
+            }
             
-//            cout<<ofGetFrameRate()<<endl;
-            
+            diffMean = mean(toCv(accumulation));
+            diffMean *= Scalar(20);
             accumulation.reloadTexture();
             //            acculmulation.getPixelsRef();
             // mean() returns a Scalar. it's a cv:: function so we have to pass a Mat
             //            diffMean = mean(toCv(diff));
             
         }
+        
+
+
     }
 }
 
@@ -408,17 +426,17 @@ void CloudsVisionSystem::selfDrawBackground()
         curFlow->draw(0, 0);
         
         if(useFarneback){
-          for(int i=0; i<flowRegions.size(); i++){
-              ofPushStyle();
-              ofNoFill();
-              ofSetColor(255);
-              //ofCircle(flowRegions[i].x, flowRegions[i].y, flowRegions[i].width);
-              ofRect(flowRegions[i]);
-              ofPopStyle();
-             // ofLine(player.getWidth()/2, player.getHeight(), ofClamp(averageFlow.x, 0, player.getWidth()) , ofClamp(averageFlow.y, 0, player.getHeight()));
-
-          }
-
+            for(int i=0; i<flowRegions.size(); i++){
+                ofPushStyle();
+                ofNoFill();
+                ofSetColor(255);
+                //ofCircle(flowRegions[i].x, flowRegions[i].y, flowRegions[i].width);
+                ofRect(flowRegions[i]);
+                ofPopStyle();
+                // ofLine(player.getWidth()/2, player.getHeight(), ofClamp(averageFlow.x, 0, player.getWidth()) , ofClamp(averageFlow.y, 0, player.getHeight()));
+                
+            }
+            
             //            for (int i=0; i<flowRegions.size(); i++)
             //            {
             //                ofLine(flowRegions[i].getCenter(),flowRegions[i].getCenter()+flowMotion[i]);
@@ -426,7 +444,22 @@ void CloudsVisionSystem::selfDrawBackground()
         }
     }
     else if(currentMode == HeatMap){
-        diff.draw(0, 0);
+        
+        accumulation.draw(0, 0);
+
+        float diffRed = diffMean[0];
+        float mapRed = ofMap(diffRed, 0, 512, 0, accumulation.width,true);
+        float diffGreen = diffMean[1];
+        float mapGreen = ofMap(diffGreen, 0, 512, 0, accumulation.width,true);
+        float diffBlue = diffMean[2];
+        float mapBlue = ofMap(diffBlue, 0, 512, 0, accumulation.width,true);
+        
+        ofSetColor(255, 0, 0);
+        ofRect(0,accumulation.height -30 , mapRed, 10);
+        ofSetColor(0, 255, 0);
+        ofRect(0,accumulation.height -15 , mapGreen, 10);
+        ofSetColor(0, 0, 255);
+        ofRect(0,accumulation.height  ,  mapBlue, 10);
     }
     
     ofPopMatrix();

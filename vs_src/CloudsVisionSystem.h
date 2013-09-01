@@ -98,6 +98,8 @@ protected:
     ofVec2f averageFlow;
     ofFbo fbo;
     
+    int accumulationCount;
+    cv::Scalar diffMean;
     //OPTICAL FLOW PARAMETERS
     float pyrScale;
     float levels;
