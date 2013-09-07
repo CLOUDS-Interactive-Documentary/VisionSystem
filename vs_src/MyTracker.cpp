@@ -49,7 +49,7 @@ void MyTracker::draw(float lineWidth) {
 		size = ofMap(ofGetElapsedTimef() - startedDying, 0, dyingTime, size, 0, true);
 	}
 	ofNoFill();
-    float scaledHue = ofMap(getLifeTime() ,0, 200, ofFloatColor::blue.getHue(), ofFloatColor::red.getHue());
+    float scaledHue = ofMap(getLifeTime() ,0, 110, ofFloatColor::blue.getHue(), ofFloatColor::red.getHue());
     ofFloatColor magnitudeColor = ofFloatColor::fromHsb(scaledHue, 128, 128 ) ;
     ofSetColor(magnitudeColor);
 //	ofSetColor(129,192,87);

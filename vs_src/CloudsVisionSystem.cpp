@@ -16,7 +16,7 @@ string CloudsVisionSystem::getSystemName()
 
 void CloudsVisionSystem::selfSetup()
 {
-    currentMode = OpticalFlow;
+    currentMode = HeatMap;
     curFlow = &farneback;
     movieIndex =0;
     pyrScale = 0.5;
@@ -50,19 +50,20 @@ void CloudsVisionSystem::selfSetup()
     accumulationCount =0;
     
     //	app
-    movieStrings.push_back("GreenPoint_bike.m4v");
+    movieIndex = 0 ;
     movieStrings.push_back("Swarm_EindhovenTest_Watec_two-visitors.mov");
+    movieStrings.push_back("GreenPoint_bike.m4v");
     movieStrings.push_back("unionsq_1_realtime 3.mp4");
     movieStrings.push_back("indianTraffic.mov");
     movieStrings.push_back("unionsq_1 - Wi-Fi.m4v");
     movieStrings.push_back("Road 2.mov");
     movieStrings.push_back("traffic_1.mov");
-
+    
     
     
     ofSetVerticalSync(true);
 	ofBackground(0);
-    if(player.loadMovie(movieStrings[0])){
+    if(player.loadMovie(movieStrings[movieIndex])){
         player.play();
     }
     else{
@@ -73,12 +74,10 @@ void CloudsVisionSystem::selfSetup()
     imitate(previous, player);
 	imitate(diff, player);
     accumulation.allocate(player.width, player.height, OF_IMAGE_COLOR);
-    
     clearAccumulation();
-    
     updateCVParameters();
-    
     populateOpticalFlowRegions();
+    
 }
 
 void CloudsVisionSystem::clearAccumulation(){
@@ -132,7 +131,6 @@ void CloudsVisionSystem::updateOpticalFlow(){
         pyrLk.setMaxLevel( maxLevel);
     }
     
-    //check it out that that you can use Flow polymorphically
     curFlow->calcOpticalFlow(player);
     
 }
@@ -186,18 +184,18 @@ void CloudsVisionSystem::selfSetupSystemGui()
     sysGui->addLabel("BACKGROUND PARAM");
     sysGui->addSlider("LEARNING TIME", 0,100,&learningTime);
     sysGui->addSlider("THRESHOLD VALUE", 0,255  ,&thresholdValue);
-
+    
     sysGui->addLabel("TRACKER PARAM");
     sysGui->addSlider("PERSISTANCE", 0,100,&cvPersistance);
     sysGui->addSlider("MAXDISTANCE", 0,100  ,&cvMaxDistance);
-
+    
     sysGui->addLabel("CONTOUR FINDER PARAMS");
     sysGui->addSlider("MIN AREA RADIUS", 0,50,&cvMinAreaRadius);
     sysGui->addSlider("MAX AREA RADIUS",0,255,&cvMaxAreaRadius);
     sysGui->addSlider("THRESHOLD VALUE", 0, 255, &cvThresholdValue);
     sysGui->addButton("UPDATE CV PARAMS", false);
-
-
+    
+    
     sysGui->addLabel("OPTICAL FLOW PARAMS");
     
 	sysGui->addSlider("PYRSCALE", .5, 0, &pyrScale);
@@ -239,6 +237,11 @@ void CloudsVisionSystem::selfSetupRenderGui()
     ofxUIButton *diffbtn = rdrGui->addToggle("DRAW DIFF", &drawDiff);
     rdrGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     ofxUIButton *clearthresholdbtn = rdrGui->addToggle("CLEAR DIFF", false);
+    rdrGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    ofxUIButton *nextVideoButton = rdrGui->addToggle("NEXT VIDEO", false);
+    rdrGui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    ofxUIButton *prevVideoButton = rdrGui->addToggle("PREVIOUS VIDEO", false);
+    
     //    rdrGui->addButton("LOAD NEXT CLIP", false);
     //    rdrGui->addButton("PLAY CLIP", false);
     rdrGui->autoSizeToFitWidgets();
@@ -273,7 +276,7 @@ void CloudsVisionSystem::selfUpdate(){
     }
     else if(currentMode == OpticalFlow){
         updateOpticalFlow();
-            
+        
     }
     else if(currentMode == HeatMap){
      	if(player.isFrameNew()) {
@@ -302,7 +305,7 @@ void CloudsVisionSystem::selfUpdate(){
             // like ofSetPixels, but more concise and cross-toolkit
             copy(player, previous);
             
-
+            
             //            ofSetColor(magnitudeColor);
             for(int i =0; i< accumulation.width; i++ ){
                 for(int j =0; j<accumulation.height; j++){
@@ -310,11 +313,11 @@ void CloudsVisionSystem::selfUpdate(){
                     if(! (accumulationCount%5) ){
                         accumulation.setColor(i, j, ofColor::black);
                         accumulationCount =0;
-
+                        
                     }
                     
                     else{
-                      ofColor c = accumulation.getColor(i, j);
+                        ofColor c = accumulation.getColor(i, j);
                         float b = c.getBrightness();
                         
                         
@@ -326,8 +329,8 @@ void CloudsVisionSystem::selfUpdate(){
                         
                     }
                     
-
-
+                    
+                    
                 }
             }
             
@@ -337,8 +340,8 @@ void CloudsVisionSystem::selfUpdate(){
             
         }
         
-
-
+        
+        
     }
 }
 
@@ -396,7 +399,7 @@ void CloudsVisionSystem::selfDrawBackground()
         
     }
     else if(currentMode == OpticalFlow){
-
+        
         
         if(useFarneback){
             farneback.drawFlowHeatMap(0, 0);
@@ -407,7 +410,7 @@ void CloudsVisionSystem::selfDrawBackground()
     else if(currentMode == HeatMap){
         
         diff.draw(0, 0);
-
+        
         float diffRed = diffMean[0];
         float mapRed = ofMap(diffRed, 0, 512, 0, accumulation.width,true);
         float diffGreen = diffMean[1];
@@ -484,10 +487,11 @@ void CloudsVisionSystem::selfGuiEvent(ofxUIEventArgs &e)
     else if (name == "OPTICAL FLOW" &&  b->getValue()){
         cout<<"setting mode to optical flow"<<endl;
         currentMode = OpticalFlow;
-        
+        drawDiff = false;
+        drawThresholded = false;
     }
     else if( name == "CONTOUR TRACKING" &&  b->getValue() ){
-        cout<<"setting mode to contour"<<endl;
+     
         currentMode = ControurTracking;
     }
     else if (name == "OPTFLOW_FARNEBACK_GAUSSIAN" ){
@@ -514,7 +518,52 @@ void CloudsVisionSystem::selfGuiEvent(ofxUIEventArgs &e)
     else if( name == "CLEAR DIFF"){
         clearAccumulation();
     }
-    
+    else if(name == "NEXT VIDEO" && b->getValue()){
+        b->setValue(false);
+        player.close();
+        thresholded.clear();
+        background.reset();
+
+        currentMode =HeatMap;
+
+            if(player.loadMovie(movieStrings[movieIndex < movieStrings.size() ? ++movieIndex : movieStrings.size() - 1])){
+                player.play();
+                imitate(previous, player);
+                imitate(diff, player);
+                imitate(thresholded, player);                
+                accumulation.allocate(player.width, player.height, OF_IMAGE_COLOR);
+                
+                clearAccumulation();                
+                updateCVParameters();
+                populateOpticalFlowRegions();
+            }
+            else{
+                cout<<"Not Playing"<<endl;
+                
+            }
+        
+    }
+    else if(name == "PREVIOUS VIDEO"  && b->getValue()){
+        b->setValue(false);
+        player.close();
+        thresholded.clear();
+        background.reset();
+        currentMode =HeatMap;
+        
+            if(player.loadMovie(movieStrings[movieIndex == 0 ? 0 : --movieIndex])){
+                player.play();
+                imitate(previous, player);
+                imitate(diff, player);
+                imitate(thresholded, player);
+                accumulation.allocate(player.width, player.height, OF_IMAGE_COLOR);
+                clearAccumulation();
+                updateCVParameters();
+                populateOpticalFlowRegions();
+            }
+            else{
+                cout<<"Not Playing"<<endl;   
+            }
+    }
     
 }
 
