@@ -50,15 +50,10 @@ void CloudsVisionSystem::selfSetup()
     accumulationCount =0;
     
     //	app
-    movieStrings.push_back("Swarm_EindhovenTest_Watec_two-visitors.mov");
     movieStrings.push_back("GreenPoint_bike.m4v");
+    movieStrings.push_back("Swarm_EindhovenTest_Watec_two-visitors.mov");
     movieStrings.push_back("unionsq_1_realtime 3.mp4");
-
-
     movieStrings.push_back("indianTraffic.mov");
-
-
-
     movieStrings.push_back("unionsq_1 - Wi-Fi.m4v");
     movieStrings.push_back("Road 2.mov");
     movieStrings.push_back("traffic_1.mov");
@@ -77,7 +72,6 @@ void CloudsVisionSystem::selfSetup()
     
     imitate(previous, player);
 	imitate(diff, player);
-    //    imitate(accumulation, player);
     accumulation.allocate(player.width, player.height, OF_IMAGE_COLOR);
     
     clearAccumulation();
@@ -279,28 +273,12 @@ void CloudsVisionSystem::selfUpdate(){
     }
     else if(currentMode == OpticalFlow){
         updateOpticalFlow();
-        if(useFarneback){
-
-//                for(int i =0; i<flowRegions.size(); i++){
-//                    flowMotion.push_back(farneback.getTotalFlowInRegion(ofRectangle(flowRegions[i].y,flowRegions[i].x,flowRegions[i].height,flowRegions[i].width)));
-//                }
-
-//            ofRectangle * rect = new ofRectangle(0,0,player.height,player.width);
-//            ofVec2f test  = farneback.getTotalFlowInRegion(*rect);
-            averageFlow =farneback.getTotalFlow();
-            
-        }
-        else{
-       
-        }
             
     }
     else if(currentMode == HeatMap){
      	if(player.isFrameNew()) {
             accumulationCount++;
             // take the absolute difference of prev and cam and save it inside diff
-
-            
             
             toCv(accumulation) += toCv(previous) -toCv(player) ;
             
@@ -356,9 +334,6 @@ void CloudsVisionSystem::selfUpdate(){
             diffMean = mean(toCv(accumulation));
             diffMean *= Scalar(20);
             accumulation.reloadTexture();
-            //            acculmulation.getPixelsRef();
-            // mean() returns a Scalar. it's a cv:: function so we have to pass a Mat
-            //            diffMean = mean(toCv(diff));
             
         }
         
@@ -412,42 +387,21 @@ void CloudsVisionSystem::selfDrawBackground()
         contourFinder.draw();
         
         vector<MyTracker>& followers = tracker.getFollowers();
-        
-        
-
-        
         for(int i = 0; i < followers.size(); i++) {
             float b = followers[i].getLifeTime();
-            ofPushStyle();
-
-            followers[i].draw(lineWidth);
-//            ofImage tex = player.getPixelsRef();
             
-//            tex.cropFrom(tex, followers[i].boundingBox.x, followers[i].boundingBox.y, followers[i].boundingBox.width, followers[i].boundingBox.height);
-            ofPopStyle();
+            followers[i].draw(lineWidth);
             
         }
         
     }
     else if(currentMode == OpticalFlow){
-        curFlow->draw(0, 0);
+
         
         if(useFarneback){
-//            for(int i=0; i<flowRegions.size(); i++){
-//                ofPushStyle();
-//                ofNoFill();
-//                ofSetColor(255);
-//                //ofCircle(flowRegions[i].x, flowRegions[i].y, flowRegions[i].width);
-//                ofRect(flowRegions[i]);
-//                ofPopStyle();
-//                // ofLine(player.getWidth()/2, player.getHeight(), ofClamp(averageFlow.x, 0, player.getWidth()) , ofClamp(averageFlow.y, 0, player.getHeight()));
-//                
-//            }
+            farneback.drawFlowHeatMap(0, 0);
             
-            //            for (int i=0; i<flowRegions.size(); i++)
-            //            {
-            //                ofLine(flowRegions[i].getCenter(),flowRegions[i].getCenter()+flowMotion[i]);
-            //            }
+            
         }
     }
     else if(currentMode == HeatMap){
@@ -474,6 +428,8 @@ void CloudsVisionSystem::selfDrawBackground()
     
     
 }
+
+
 
 void CloudsVisionSystem::selfDrawDebug()
 {

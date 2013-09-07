@@ -90,6 +90,8 @@ protected:
 	ofxCv::Flow* curFlow;
     void updateOpticalFlow();
     void clearAccumulation();
+    void drawFlowHeatMap(int x, int y);
+   
     list<ofImage> accumVector;
     bool drawPlayer;
     bool drawThresholded;
