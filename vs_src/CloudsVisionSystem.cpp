@@ -50,9 +50,10 @@ void CloudsVisionSystem::selfSetup()
     accumulationCount =0;
     
     //	app
+    movieStrings.push_back("Swarm_EindhovenTest_Watec_two-visitors.mov");
     movieStrings.push_back("GreenPoint_bike.m4v");
     movieStrings.push_back("unionsq_1_realtime 3.mp4");
-    movieStrings.push_back("Swarm_EindhovenTest_Watec_two-visitors.mov");
+
 
     movieStrings.push_back("indianTraffic.mov");
 
@@ -412,10 +413,18 @@ void CloudsVisionSystem::selfDrawBackground()
         
         vector<MyTracker>& followers = tracker.getFollowers();
         
+        
+
+        
         for(int i = 0; i < followers.size(); i++) {
+            float b = followers[i].getLifeTime();
+            ofPushStyle();
+
             followers[i].draw(lineWidth);
-            ofImage tex = player.getPixelsRef();
-            tex.cropFrom(tex, followers[i].boundingBox.x, followers[i].boundingBox.y, followers[i].boundingBox.width, followers[i].boundingBox.height);
+//            ofImage tex = player.getPixelsRef();
+            
+//            tex.cropFrom(tex, followers[i].boundingBox.x, followers[i].boundingBox.y, followers[i].boundingBox.width, followers[i].boundingBox.height);
+            ofPopStyle();
             
         }
         
