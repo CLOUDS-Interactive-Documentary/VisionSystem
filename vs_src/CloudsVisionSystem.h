@@ -96,7 +96,7 @@ protected:
     bool drawPlayer;
     bool drawThresholded;
     bool drawDiff;
-    
+    bool flowFirstFrame;
 
     ofVec2f averageFlow;
     ofFbo fbo;

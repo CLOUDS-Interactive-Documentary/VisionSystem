@@ -30,6 +30,7 @@ void CloudsVisionSystem::selfSetup()
     maxFeatures = 200;
     qualityLevel = 0.01;
     minDistance = 4;
+    flowFirstFrame = true;
     
     useFarneback = true;
     drawPlayer = true;
@@ -111,27 +112,31 @@ void CloudsVisionSystem::populateOpticalFlowRegions(){
 
 void CloudsVisionSystem::updateOpticalFlow(){
     
-    
-    if(useFarneback) {
-        curFlow = &farneback;
-        farneback.setPyramidScale( pyrScale);
-        farneback.setNumLevels( levels );
-        farneback.setWindowSize( winsize) ;
-        farneback.setNumIterations( iterations);
-        farneback.setPolyN( polyN) ;
-        farneback.setPolySigma( polySigma );
-        farneback.setUseGaussian(OPTFLOW_FARNEBACK_GAUSSIAN);
+    if( ! flowFirstFrame){
+        if(useFarneback) {
+            curFlow = &farneback;
+            farneback.setPyramidScale( pyrScale);
+            farneback.setNumLevels( levels );
+            farneback.setWindowSize( winsize) ;
+            farneback.setNumIterations( iterations);
+            farneback.setPolyN( polyN) ;
+            farneback.setPolySigma( polySigma );
+            farneback.setUseGaussian(OPTFLOW_FARNEBACK_GAUSSIAN);
+            
+        } else {
+            curFlow = &pyrLk;
+            pyrLk.setMaxFeatures( maxFeatures);
+            pyrLk.setQualityLevel( qualityLevel );
+            pyrLk.setMinDistance( minDistance);
+            pyrLk.setWindowSize( winSize);
+            pyrLk.setMaxLevel( maxLevel);
+        }
         
-    } else {
-        curFlow = &pyrLk;
-        pyrLk.setMaxFeatures( maxFeatures);
-        pyrLk.setQualityLevel( qualityLevel );
-        pyrLk.setMinDistance( minDistance);
-        pyrLk.setWindowSize( winSize);
-        pyrLk.setMaxLevel( maxLevel);
+        curFlow->calcOpticalFlow(previous, player);//calcOpticalFlow(player);
     }
-    
-    curFlow->calcOpticalFlow(player);
+    flowFirstFrame = false;
+    copy(player, previous);
+
     
 }
 
@@ -205,14 +210,14 @@ void CloudsVisionSystem::selfSetupSystemGui()
 	sysGui->addSlider("POLYN",5, 10, &polyN);
 	sysGui->addSlider("POLYSIGMA", 1.5, 1.1, &polySigma);
 	sysGui->addToggle("OPTFLOW_FARNEBACK_GAUSSIAN", useFarneback);
-	
+
 	sysGui->addSlider("WINSIZE", 4, 64, &winSize);
 	sysGui->addSlider("MAXLEVEL", 0, 8, &maxLevel);
-	
+
 	sysGui->addSlider("MAXFEATURES", 200, 1, &maxFeatures);
 	sysGui->addSlider("QUALITYLEVEL", 0.01, 0.001, &qualityLevel);
 	sysGui->addSlider("MINDISTANCE", 4, 1, &minDistance);
-    
+
     sysGui->autoSizeToFitWidgets();
     
     ofAddListener(sysGui->newGUIEvent, this, &CloudsVisionSystem::selfGuiEvent);
@@ -304,8 +309,7 @@ void CloudsVisionSystem::selfUpdate(){
             
             // like ofSetPixels, but more concise and cross-toolkit
             copy(player, previous);
-            
-            
+
             //            ofSetColor(magnitudeColor);
             for(int i =0; i< accumulation.width; i++ ){
                 for(int j =0; j<accumulation.height; j++){
@@ -315,7 +319,6 @@ void CloudsVisionSystem::selfUpdate(){
                         accumulationCount =0;
                         
                     }
-                    
                     else{
                         ofColor c = accumulation.getColor(i, j);
                         float b = c.getBrightness();
@@ -328,20 +331,14 @@ void CloudsVisionSystem::selfUpdate(){
                         }
                         
                     }
-                    
-                    
-                    
+
                 }
             }
             
             diffMean = mean(toCv(accumulation));
             diffMean *= Scalar(20);
             accumulation.reloadTexture();
-            
-        }
-        
-        
-        
+        } 
     }
 }
 
@@ -523,6 +520,7 @@ void CloudsVisionSystem::selfGuiEvent(ofxUIEventArgs &e)
         player.close();
         thresholded.clear();
         background.reset();
+
 
         currentMode =HeatMap;
 
