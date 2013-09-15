@@ -11,7 +11,7 @@ using namespace cv;
 
 string CloudsVisionSystem::getSystemName()
 {
-	return "CloudssVisionSystem";
+	return "VisionSystem";
 }
 
 void CloudsVisionSystem::selfSetup()
