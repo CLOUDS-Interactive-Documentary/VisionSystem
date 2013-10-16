@@ -47,34 +47,38 @@ public:
     void selfMouseMoved(ofMouseEventArgs& data);
     void selfMousePressed(ofMouseEventArgs& data);
     void selfMouseReleased(ofMouseEventArgs& data);
-    
+    void resetFlowField();
     void selfSetupGui();
     void selfGuiEvent(ofxUIEventArgs &e);
     
     void selfSetupSystemGui();
     void guiSystemEvent(ofxUIEventArgs &e);
-    
+    void updateImagesForNewVideo();
+    void updateOpticalFlowParameters();
     void selfSetupRenderGui();
     void guiRenderEvent(ofxUIEventArgs &e);
     void getTextures();
 
 protected:
-    
+
     //video player stuff
     ofVideoPlayer player;
     int playerIndex;
     int movieIndex;
     vector<string> movieStrings;
     CVMode currentMode;
-    
+
     vector<ofRectangle> flowRegions;
     void populateOpticalFlowRegions();
     vector<ofVec2f> flowMotion;
     
     ofImage accumulation;
     ofImage diff;
-    ofImage previous;
-    
+
+    ofImage previousHeatMap;
+    ofImage flowImage;
+    ofImage previousFlowImage;
+    ofImage test;
     //Contour tracking stuff
     ofxCv::ContourFinder contourFinder;
 	ofxCv::RectTrackerFollower<MyTracker> tracker;
@@ -83,7 +87,7 @@ protected:
     ofxCv::RunningBackground background;
     cv::Rect accumRegion;
     vector<ParkedCar> parked;
-    
+
     //Optical flow types
     ofxCv::FlowFarneback farneback;
 	ofxCv::FlowPyrLK pyrLk;
@@ -91,7 +95,7 @@ protected:
     void updateOpticalFlow();
     void clearAccumulation();
     void drawFlowHeatMap(int x, int y);
-   
+    ofVboMesh flowMesh;
     list<ofImage> accumVector;
     bool drawPlayer;
     bool drawThresholded;
