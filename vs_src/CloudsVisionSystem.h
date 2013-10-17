@@ -39,7 +39,7 @@ public:
     void selfExit();
     void selfBegin();
 	void selfEnd();
-    
+    ofRectangle window;
     void selfKeyPressed(ofKeyEventArgs & args);
     void selfKeyReleased(ofKeyEventArgs & args);
     
@@ -62,10 +62,15 @@ public:
 protected:
 
     //video player stuff
-    ofVideoPlayer player;
+    ofPtr<ofVideoPlayer> player;
+    ofPixels resizeToPixels;
+    int skipFrames;
+//    ofVideoPlayer* player;
     int playerIndex;
     int movieIndex;
+    bool frameIsNew;
     vector<string> movieStrings;
+
     CVMode currentMode;
     int scale;
     vector<ofRectangle> flowRegions;
@@ -104,6 +109,12 @@ protected:
 
     ofVec2f averageFlow;
     ofFbo fbo;
+    int mouseX;
+    int mouseY;
+    
+    float windowWidth;
+    float windowHeight;
+    void loadCurrentMovie();
     
     int accumulationCount;
     cv::Scalar diffMean;
