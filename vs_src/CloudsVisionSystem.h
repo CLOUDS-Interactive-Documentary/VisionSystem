@@ -67,7 +67,7 @@ protected:
     int movieIndex;
     vector<string> movieStrings;
     CVMode currentMode;
-
+    int scale;
     vector<ofRectangle> flowRegions;
     void populateOpticalFlowRegions();
     vector<ofVec2f> flowMotion;
@@ -78,7 +78,7 @@ protected:
     ofImage previousHeatMap;
     ofImage flowImage;
     ofImage previousFlowImage;
-    ofImage test;
+
     //Contour tracking stuff
     ofxCv::ContourFinder contourFinder;
 	ofxCv::RectTrackerFollower<MyTracker> tracker;
