@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		18C89514180F5FA10009703D /* CloudsRGBDCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18C89510180F5FA10009703D /* CloudsRGBDCamera.cpp */; };
+		18C89515180F5FA10009703D /* CloudsRGBDVideoPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18C89512180F5FA10009703D /* CloudsRGBDVideoPlayer.cpp */; };
+		18C89523181061690009703D /* ETF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18C89521181061690009703D /* ETF.cpp */; };
+		18C89524181061690009703D /* fdog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18C89522181061690009703D /* fdog.cpp */; };
 		18EF2716179F573200374D31 /* MyTracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EF270B179F573200374D31 /* MyTracker.cpp */; };
 		18EF2718179F573200374D31 /* FlowField.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EF270F179F573200374D31 /* FlowField.cpp */; };
 		18EF271A179F573200374D31 /* ParkedCar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18EF2712179F573200374D31 /* ParkedCar.cpp */; };
@@ -78,7 +82,6 @@
 		3D5B941D1753048A00F558AC /* ofxTextInputField.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D5B94191753048A00F558AC /* ofxTextInputField.cpp */; };
 		3D5B943B1753049600F558AC /* ofxMSATimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D5B94361753049600F558AC /* ofxMSATimer.cpp */; };
 		3DA460BC179EC5C2002EC0AC /* CloudsVisionSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DA460BA179EC5C2002EC0AC /* CloudsVisionSystem.cpp */; };
-		3DA460C7179ED608002EC0AC /* CloudsRGBDCombinedRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DA460C0179ED608002EC0AC /* CloudsRGBDCombinedRenderer.cpp */; };
 		3DA460C8179ED608002EC0AC /* CloudsVisualSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DA460C2179ED608002EC0AC /* CloudsVisualSystem.cpp */; };
 		3DEFE117176E7D8000139095 /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DEFE110176E7D8000139095 /* tinyxml.cpp */; };
 		3DEFE118176E7D8000139095 /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DEFE112176E7D8000139095 /* tinyxmlerror.cpp */; };
@@ -154,6 +157,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		18C89510180F5FA10009703D /* CloudsRGBDCamera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CloudsRGBDCamera.cpp; sourceTree = "<group>"; };
+		18C89511180F5FA10009703D /* CloudsRGBDCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudsRGBDCamera.h; sourceTree = "<group>"; };
+		18C89512180F5FA10009703D /* CloudsRGBDVideoPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CloudsRGBDVideoPlayer.cpp; sourceTree = "<group>"; };
+		18C89513180F5FA10009703D /* CloudsRGBDVideoPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudsRGBDVideoPlayer.h; sourceTree = "<group>"; };
+		18C8951C181061690009703D /* ETF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ETF.h; sourceTree = "<group>"; };
+		18C8951D181061690009703D /* fdog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fdog.h; sourceTree = "<group>"; };
+		18C8951E181061690009703D /* imatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imatrix.h; sourceTree = "<group>"; };
+		18C8951F181061690009703D /* myvec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = myvec.h; sourceTree = "<group>"; };
+		18C89521181061690009703D /* ETF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ETF.cpp; sourceTree = "<group>"; };
+		18C89522181061690009703D /* fdog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fdog.cpp; sourceTree = "<group>"; };
 		18EF270B179F573200374D31 /* MyTracker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MyTracker.cpp; sourceTree = "<group>"; };
 		18EF270C179F573200374D31 /* MyTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyTracker.h; sourceTree = "<group>"; };
 		18EF270F179F573200374D31 /* FlowField.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FlowField.cpp; sourceTree = "<group>"; };
@@ -412,8 +425,6 @@
 		3D5B9442175304B800F558AC /* ofRange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofRange.h; sourceTree = "<group>"; };
 		3DA460BA179EC5C2002EC0AC /* CloudsVisionSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CloudsVisionSystem.cpp; sourceTree = "<group>"; };
 		3DA460BB179EC5C2002EC0AC /* CloudsVisionSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudsVisionSystem.h; sourceTree = "<group>"; };
-		3DA460C0179ED608002EC0AC /* CloudsRGBDCombinedRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CloudsRGBDCombinedRenderer.cpp; sourceTree = "<group>"; };
-		3DA460C1179ED608002EC0AC /* CloudsRGBDCombinedRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudsRGBDCombinedRenderer.h; sourceTree = "<group>"; };
 		3DA460C2179ED608002EC0AC /* CloudsVisualSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CloudsVisualSystem.cpp; sourceTree = "<group>"; };
 		3DA460C3179ED608002EC0AC /* CloudsVisualSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudsVisualSystem.h; sourceTree = "<group>"; };
 		3DA460C5179ED608002EC0AC /* ofxLight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxLight.h; sourceTree = "<group>"; };
@@ -581,6 +592,43 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		18C89519181061690009703D /* CLD */ = {
+			isa = PBXGroup;
+			children = (
+				18C8951A181061690009703D /* include */,
+				18C89520181061690009703D /* src */,
+			);
+			path = CLD;
+			sourceTree = "<group>";
+		};
+		18C8951A181061690009703D /* include */ = {
+			isa = PBXGroup;
+			children = (
+				18C8951B181061690009703D /* CLD */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		18C8951B181061690009703D /* CLD */ = {
+			isa = PBXGroup;
+			children = (
+				18C8951C181061690009703D /* ETF.h */,
+				18C8951D181061690009703D /* fdog.h */,
+				18C8951E181061690009703D /* imatrix.h */,
+				18C8951F181061690009703D /* myvec.h */,
+			);
+			path = CLD;
+			sourceTree = "<group>";
+		};
+		18C89520181061690009703D /* src */ = {
+			isa = PBXGroup;
+			children = (
+				18C89521181061690009703D /* ETF.cpp */,
+				18C89522181061690009703D /* fdog.cpp */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
 		18EF271D179F58E800374D31 /* ofxCv */ = {
 			isa = PBXGroup;
 			children = (
@@ -599,6 +647,7 @@
 			isa = PBXGroup;
 			children = (
 				18EF292C179F58EF00374D31 /* .gitignore */,
+				18C89519181061690009703D /* CLD */,
 				18EF292D179F58EF00374D31 /* ofxCv */,
 			);
 			path = libs;
@@ -1321,8 +1370,10 @@
 		3DA460BE179ED608002EC0AC /* VisualSystemsLibrary */ = {
 			isa = PBXGroup;
 			children = (
-				3DA460C0179ED608002EC0AC /* CloudsRGBDCombinedRenderer.cpp */,
-				3DA460C1179ED608002EC0AC /* CloudsRGBDCombinedRenderer.h */,
+				18C89510180F5FA10009703D /* CloudsRGBDCamera.cpp */,
+				18C89511180F5FA10009703D /* CloudsRGBDCamera.h */,
+				18C89512180F5FA10009703D /* CloudsRGBDVideoPlayer.cpp */,
+				18C89513180F5FA10009703D /* CloudsRGBDVideoPlayer.h */,
 				3DA460C2179ED608002EC0AC /* CloudsVisualSystem.cpp */,
 				3DA460C3179ED608002EC0AC /* CloudsVisualSystem.h */,
 				3DA460C5179ED608002EC0AC /* ofxLight.h */,
@@ -1743,7 +1794,6 @@
 				3DEFE119176E7D8000139095 /* tinyxmlparser.cpp in Sources */,
 				3DEFE11A176E7D8000139095 /* ofxXmlSettings.cpp in Sources */,
 				3DA460BC179EC5C2002EC0AC /* CloudsVisionSystem.cpp in Sources */,
-				3DA460C7179ED608002EC0AC /* CloudsRGBDCombinedRenderer.cpp in Sources */,
 				3DA460C8179ED608002EC0AC /* CloudsVisualSystem.cpp in Sources */,
 				18EF2716179F573200374D31 /* MyTracker.cpp in Sources */,
 				18EF2718179F573200374D31 /* FlowField.cpp in Sources */,
@@ -1765,6 +1815,10 @@
 				18EF2B01179F58F100374D31 /* ofxCvHaarFinder.cpp in Sources */,
 				18EF2B02179F58F100374D31 /* ofxCvImage.cpp in Sources */,
 				18EF2B03179F58F100374D31 /* ofxCvShortImage.cpp in Sources */,
+				18C89514180F5FA10009703D /* CloudsRGBDCamera.cpp in Sources */,
+				18C89515180F5FA10009703D /* CloudsRGBDVideoPlayer.cpp in Sources */,
+				18C89523181061690009703D /* ETF.cpp in Sources */,
+				18C89524181061690009703D /* fdog.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

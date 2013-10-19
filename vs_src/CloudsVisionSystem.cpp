@@ -44,6 +44,9 @@ void CloudsVisionSystem::selfSetup()
     drawPlayer = true;
     drawThresholded =false;
     
+    flowLineMultiplier = 1;
+    flowColorMapRange = 50;
+    flowLineWidth = 2;
     learningTime = 15;
     thresholdValue =128;
     cvPersistance =3;
@@ -59,19 +62,15 @@ void CloudsVisionSystem::selfSetup()
     windowWidth = 500;
     windowHeight = 500;
     
+    
+    
     ofEnableBlendMode(OF_BLENDMODE_ADD);
     //	app
     movieIndex = 0;
     movieStrings.push_back("union_square_crop.mov");
-    //    movieStrings.push_back("union_square_crop.mov");
-    //    movieStrings.push_back("union_square_crop.mov");
-    //    movieStrings.push_back("union_square_crop.mov");
     movieStrings.push_back("GreenPoint_bike_crop.mov");
     movieStrings.push_back("indianTrafficCrop.mov");
     movieStrings.push_back("unionsq_1 - Wi-Fi_crop.mov");
-    //    movieStrings.push_back("union_square_crop.mov");
-    //    movieStrings.push_back("union_square_crop.mov");
-    //    movieStrings.push_back("union_square_crop.mov");
     //    movieStrings.push_back("unionsq_1_realtime 3.mp4");
     //    movieStrings.push_back("Swarm_EindhovenTest_Watec_two-visitors.mov");
     //    movieStrings.push_back("Road 2.mov");
@@ -79,27 +78,8 @@ void CloudsVisionSystem::selfSetup()
     frameIsNew = false;
     window = ofRectangle(0,0,500,500);
     loadCurrentMovie();
-    //    player = ofPtr<ofVideoPlayer>(new ofVideoPlayer());
-    //
-    //    if(player->loadMovie(movieStrings[movieIndex])){
-    //        player->play();
-    //        resizeToPixels.allocate(player->getWidth()/scale,player->getHeight()/scale,
-    //                                player->getPixelsRef().getImageType());
-    //
-    ////        farneback = ofPtr<ofxCv::FlowFarneback>( new  ofxCv::FlowFarneback() );
-    //
-    //    }
-    //    else{
-    //        cout<<"Not Playing"<<endl;
-    //    }
-    //
-    //    resetFlowField();
-    //    clearAccumulation();
-    //    updateCVParameters();
-    //    populateOpticalFlowRegions();
-    //    updateImagesForNewVideo();
-    //    updateOpticalFlowParameters();
-    //    flowImage.allocate(player., int h, ofImageType type)
+    screenRect = ofRectangle(0, 0, ofGetWidth(), ofGetHeight());
+    
 }
 
 void CloudsVisionSystem::clearAccumulation(){
@@ -110,14 +90,7 @@ void CloudsVisionSystem::clearAccumulation(){
     }
 }
 void CloudsVisionSystem::updateImagesForNewVideo(){
-    //    accumulation.clear();
-    //    diff.clear();
-    //    previous.clear();
-    //    previousHeatMap.clear();
-    //    flowImage.clear();
     
-    
-    //    flowImage.allocate(player.width/2, player.height/2, OF_IMAGE_COLOR);
     imitate(previousHeatMap, *player);
     imitate(diff, *player);
     accumulation.allocate(player->width, player->height, OF_IMAGE_COLOR);
@@ -131,7 +104,7 @@ void CloudsVisionSystem::resetFlowField(){
     flowMesh.setMode(OF_PRIMITIVE_LINES);
     cout<<"resetting flow lines: "<<player->getWidth()<<" , "<<player->getHeight()<<endl;
     for( int j=0; j<player->getHeight(); j +=10){
-        for( int i=0; i<player->getWidth(); i += 10){
+        for( int i=0; i<player->getWidth(); i += 10 ){
             flowMesh.addVertex(ofVec3f(i, j,0));
             flowMesh.addVertex(ofVec3f(i, j,0));
             flowMesh.addColor(ofColor::white);
@@ -176,33 +149,93 @@ void CloudsVisionSystem::updateOpticalFlow(){
         player->getPixelsRef().resizeTo(resizeToPixels);
         farneback.calcOpticalFlow(resizeToPixels);
         
-        float x =ofGetWidth()/2 -player->getWidth()/2;
-        float y =ofGetHeight()/2 -player->getHeight()/2;
-        
         window.setFromCenter(mouseX, mouseY, windowWidth, windowHeight);
+        
         for( int i = 0; i < flowMesh.getVertices().size(); i+=2){
             if(window.inside(flowMesh.getVertex(i))){
                 ofVec2f pos = farneback.getFlowOffset(flowMesh.getVertex(i).x/scale, flowMesh.getVertex(i).y/scale );
                 
-                
+                pos *= flowLineMultiplier;
                 pos.x += flowMesh.getVertex(i).x;
                 pos.y += flowMesh.getVertex(i).y;
+                
+
+
                 flowMesh.setVertex(i+1, ofVec3f( pos.x,pos.y,0));
                 
-                float mag =flowMesh.getVertex(i).distance(ofVec2f(flowMesh.getVertex(i+1).x, flowMesh.getVertex(i+1).y));
-                
+                float mag =flowMesh.getVertex(i).distance(flowMesh.getVertex(i+1));
+
                 float scaledHue = ofMap(mag,0, 50, ofFloatColor::blue.getHue(), ofFloatColor::red.getHue());
                 ofFloatColor magnitudeColor = ofFloatColor::fromHsb(scaledHue, 128, 128 ) ;
                 flowMesh.setColor(i+1,magnitudeColor);
+//                flowMesh.
             }
             else{
                 flowMesh.setColor(i,0);
                 flowMesh.setColor(i+1,0);
-
+                
             }
-
+            
         }
         flowFirstFrame = false;
+    }
+}
+
+void CloudsVisionSystem::updateHeatMap(){
+    
+    if(frameIsNew){
+        accumulationCount++;
+        // take the absolute difference of prev and cam and save it inside diff
+        toCv(accumulation) += toCv(previousHeatMap) -toCv(*player) ;
+        
+        absdiff(previousHeatMap, *player, diff);
+        for(int i =0; i< diff.width; i++ ){
+            for(int j =0; j<diff.height; j++){
+                ofColor c = diff.getColor(i, j);
+                float b = c.getBrightness();
+                
+                if(b > 10 ){
+                    float scaledHue = ofMap(b ,0, 255, ofFloatColor::blue.getHue(), ofFloatColor::red.getHue());
+                    ofFloatColor magnitudeColor = ofFloatColor::fromHsb(scaledHue, 128, 128 ) ;
+                    diff.setColor(i, j, magnitudeColor);
+                }
+            }
+        }
+        diff.update();
+        copy(*player, previousHeatMap);
+        for(int i =0; i< accumulation.width; i++ ){
+            for(int j =0; j<accumulation.height; j++){
+                
+                if(! (accumulationCount%5) ){
+                    accumulation.setColor(i, j, ofColor::black);
+                    accumulationCount =0;
+                }
+                else{
+                    ofColor c = accumulation.getColor(i, j);
+                    float b = c.getBrightness();
+                    if(b > 50 ){
+                        float scaledHue = ofMap(b ,0, 255, ofFloatColor::blue.getHue(), ofFloatColor::orange.getHue());
+                        ofFloatColor magnitudeColor = ofFloatColor::fromHsb(scaledHue, 200, 200) ;
+                        accumulation.setColor(i, j, magnitudeColor);
+                    }
+                }
+            }
+        }
+        diffMean = mean(toCv(accumulation));
+        diffMean *= Scalar(20);
+        accumulation.reloadTexture();
+    }
+    
+}
+
+void CloudsVisionSystem::updateContourTracking(){
+    if(frameIsNew){
+        
+        background.update(*player, thresholded);
+        thresholded.update();
+        blur(thresholded, 5);
+        contourFinder.findContours(thresholded);
+        tracker.track(contourFinder.getBoundingRects());
     }
 }
 
@@ -224,7 +257,6 @@ void CloudsVisionSystem::updateCVParameters(){
     tracker.setPersistence(cvPersistance);
     // an object can move up to 50 pixels per frame
     tracker.setMaximumDistance(cvMaxDistance);
-    //    tracker.
     
 }
 
@@ -249,7 +281,6 @@ void CloudsVisionSystem::selfEnd()
 
 void CloudsVisionSystem::selfExit()
 {
-    
 }
 
 void CloudsVisionSystem::selfSetupSystemGui()
@@ -281,6 +312,10 @@ void CloudsVisionSystem::selfSetupSystemGui()
     sysGui->addButton("UPDATE FLOW PARAMS", false);
     sysGui->addSlider("WINDOW WIDTH", 100, 1000, &windowWidth);
     sysGui->addSlider("WINDOW HEIGHT", 100, 1000, &windowHeight);
+    sysGui->addSlider("FLOW LINE LENGTH", 0.5, 3, &flowLineMultiplier);
+    sysGui->addSlider("FLOW COLOUR MAP RANGE", 10, 200, &flowColorMapRange);
+    sysGui->addSlider("FLOW LINE WIDTH", 1, 10, &flowLineWidth);
+    
     sysGui->autoSizeToFitWidgets();
     
     ofAddListener(sysGui->newGUIEvent, this, &CloudsVisionSystem::selfGuiEvent);
@@ -315,82 +350,98 @@ void CloudsVisionSystem::selfSetupRenderGui()
     
 }
 
-void CloudsVisionSystem::guiSystemEvent(ofxUIEventArgs &e)
-{
-    
-}
-
-void CloudsVisionSystem::selfKeyPressed(ofKeyEventArgs & args){
-    
-}
-
 void CloudsVisionSystem::selfUpdate(){
     player->update();
     frameIsNew = player->isFrameNew();
+    
     if(currentMode == ControurTracking){
-        if(player->isPlaying() && player->isLoaded()){
-            
-            if(frameIsNew){
-                background.update(*player, thresholded);
-                thresholded.update();
-                blur(thresholded, 5);
-                contourFinder.findContours(thresholded);
-                tracker.track(contourFinder.getBoundingRects());
-            }
-        }
+        
+        updateContourTracking();
     }
     else if(currentMode == OpticalFlow){
+        
         updateOpticalFlow();
     }
     else if(currentMode == HeatMap){
         
-        if(player->isFrameNew()) {
-            accumulationCount++;
-            // take the absolute difference of prev and cam and save it inside diff
-            toCv(accumulation) += toCv(previousHeatMap) -toCv(*player) ;
-
-            absdiff(previousHeatMap, *player, diff);
-            for(int i =0; i< diff.width; i++ ){
-                for(int j =0; j<diff.height; j++){
-                    ofColor c = diff.getColor(i, j);
-                    float b = c.getBrightness();
-                    
-                    if(b > 10 ){
-                        float scaledHue = ofMap(b ,0, 255, ofFloatColor::blue.getHue(), ofFloatColor::red.getHue());
-                        ofFloatColor magnitudeColor = ofFloatColor::fromHsb(scaledHue, 128, 128 ) ;
-                        diff.setColor(i, j, magnitudeColor);
-                    }
-                }
-            }
-            diff.update();
-            // like ofSetPixels, but more concise and cross-toolkit
-            copy(*player, previousHeatMap);
-            //            ofSetColor(magnitudeColor);
-            for(int i =0; i< accumulation.width; i++ ){
-                for(int j =0; j<accumulation.height; j++){
-                    
-                    if(! (accumulationCount%5) ){
-                        accumulation.setColor(i, j, ofColor::black);
-                        accumulationCount =0;
-                    }
-                    else{
-                        ofColor c = accumulation.getColor(i, j);
-                        float b = c.getBrightness();
-                        if(b > 50 ){
-                            float scaledHue = ofMap(b ,0, 255, ofFloatColor::blue.getHue(), ofFloatColor::orange.getHue());
-                            ofFloatColor magnitudeColor = ofFloatColor::fromHsb(scaledHue, 200, 200) ;
-                            accumulation.setColor(i, j, magnitudeColor);
-                        }
-                    }
-                }
-            }
-            diffMean = mean(toCv(accumulation));
-            diffMean *= Scalar(20);
-            accumulation.reloadTexture();
-        }
+        updateHeatMap();
     }
 }
 
+void CloudsVisionSystem::selfDrawBackground()
+{
+    
+    
+    float x =ofGetWidth()/2 -player->getWidth()/2;
+    float y =ofGetHeight()/2 -player->getHeight()/2;
+    
+    ofSetColor(128,128);
+//    ofRect(videoRect);
+//    ofSetColor(0,128,0,128);
+//    ofRect(window);
+    
+    if(drawPlayer){
+        player->draw(0,0);
+    }
+    if(drawThresholded){
+        flowMesh.draw();
+        thresholded.draw(0,0, thresholded.width, thresholded.height);
+    }
+    
+    if(currentMode == ControurTracking){
+        ofPushMatrix();
+        ofTranslate(ofGetWidth()/2, ofGetHeight()/2);
+        ofPushMatrix();
+        ofTranslate(-player->getWidth()/2, -player->getHeight()/2);
+        contourFinder.draw();
+        
+        vector<MyTracker>& followers = tracker.getFollowers();
+        for(int i = 0; i < followers.size(); i++) {
+            float b = followers[i].getLifeTime();
+            
+            followers[i].draw(lineWidth);
+            
+        }
+        ofPopMatrix();
+        ofPopMatrix();
+        
+    }
+    else if(currentMode == OpticalFlow){
+        
+        ofTexture tex = player->getTextureReference();
+
+//        ofRectangle sub = ofRectangle
+        ofPushStyle();
+        ofSetColor(200);
+//        player->draw(mouseX-window.width/2 , mouseY-window.height/2, window.width, window.height);
+        tex.drawSubsection(mouseX-window.width/2 , mouseY-window.height/2, window.width, window.height, mouseX-window.width/2, mouseY-window.height/2);//crop(mouseX-window.width/2 , mouseY-window.height/2, window.width, window.height);
+        ofSetLineWidth(flowLineWidth);
+        //tex.draw(window);
+        flowMesh.draw();
+        ofPopStyle();
+
+    }
+    else if(currentMode == HeatMap){
+        
+        diff.draw(x, y);
+        
+        float diffRed = diffMean[0];
+        float mapRed = ofMap(diffRed, 0, 512, 0, accumulation.width,true);
+        float diffGreen = diffMean[1];
+        float mapGreen = ofMap(diffGreen, 0, 512, 0, accumulation.width,true);
+        float diffBlue = diffMean[2];
+        float mapBlue = ofMap(diffBlue, 0, 512, 0, accumulation.width,true);
+        
+        ofSetColor(255, 0, 0);
+        ofRect(0,0 + accumulation.height -30 , mapRed, 10);
+        ofSetColor(0, 255, 0);
+        ofRect(0, 0 + accumulation.height -15 , mapGreen, 10);
+        ofSetColor(0, 0, 255);
+        ofRect(0, 0+ accumulation.height  ,  mapBlue, 10);
+    }
+    
+    
+}
 
 void CloudsVisionSystem::selfDraw()
 {
@@ -408,70 +459,14 @@ void CloudsVisionSystem::selfAutoMode()
     
 }
 
-
-void CloudsVisionSystem::selfDrawBackground()
+void CloudsVisionSystem::guiSystemEvent(ofxUIEventArgs &e)
 {
-    ofSetColor(128,128);
-
-
-    float x =ofGetWidth()/2 -player->getWidth()/2;
-    float y =ofGetHeight()/2 -player->getHeight()/2;
-    
-
-    if(drawPlayer){
-        player->draw(x,y);
-    }
-    if(drawThresholded){
-        flowMesh.draw();
-        thresholded.draw(x,y, thresholded.width, thresholded.height);
-    }
-    
-    if(currentMode == ControurTracking){
-        contourFinder.draw();
-        
-        vector<MyTracker>& followers = tracker.getFollowers();
-        for(int i = 0; i < followers.size(); i++) {
-            float b = followers[i].getLifeTime();
-            
-            followers[i].draw(lineWidth);
-            
-        }
-        
-    }
-    else if(currentMode == OpticalFlow){
-        ofPushMatrix();
-        ofTranslate(ofGetWidth()/2, ofGetHeight()/2);
-        ofPushMatrix();
-        ofTranslate(-player->getWidth()/2, -player->getHeight()/2);
-
-        ofRect(window.x  , window.y, window.width,window.height);
-        flowMesh.draw();
-        ofPopMatrix();
-        ofPopMatrix();
-    }
-    else if(currentMode == HeatMap){
-        
-        diff.draw(0, 0);
-        
-        float diffRed = diffMean[0];
-        float mapRed = ofMap(diffRed, 0, 512, 0, accumulation.width,true);
-        float diffGreen = diffMean[1];
-        float mapGreen = ofMap(diffGreen, 0, 512, 0, accumulation.width,true);
-        float diffBlue = diffMean[2];
-        float mapBlue = ofMap(diffBlue, 0, 512, 0, accumulation.width,true);
-        
-        ofSetColor(255, 0, 0);
-        ofRect(0,accumulation.height -30 , mapRed, 10);
-        ofSetColor(0, 255, 0);
-        ofRect(0,accumulation.height -15 , mapGreen, 10);
-        ofSetColor(0, 0, 255);
-        ofRect(0,accumulation.height  ,  mapBlue, 10);
-    }
-
     
 }
 
-
+void CloudsVisionSystem::selfKeyPressed(ofKeyEventArgs & args){
+    
+}
 
 void CloudsVisionSystem::selfDrawDebug()
 {
@@ -546,7 +541,6 @@ void CloudsVisionSystem::selfGuiEvent(ofxUIEventArgs &e)
         
     }
     else if (name == "DRAW PLAYER"){
-        //        currentMode = ControurTracking;
         drawPlayer = b->getValue();
         drawThresholded = false;
         drawDiff = false;
@@ -568,8 +562,6 @@ void CloudsVisionSystem::selfGuiEvent(ofxUIEventArgs &e)
     }
     else if(name == "NEXT VIDEO" && b->getValue()){
         b->setValue(false);
-        //        cout<<"Player dimensions (old) :"<< player->getWidth()<<" , "<<player->getHeight() <<endl;
-        //            player.stop();
         thresholded.clear();
         background.reset();
         movieIndex = (movieIndex + 1) % movieStrings.size();
@@ -577,8 +569,6 @@ void CloudsVisionSystem::selfGuiEvent(ofxUIEventArgs &e)
     }
     else if(name == "PREVIOUS VIDEO"  && b->getValue()){
         b->setValue(false);
-        //        cout<<"Player dimensions (old) :"<< player->getWidth()<<" , "<<player->getHeight() <<endl;
-        //            player.stop();
         thresholded.clear();
         background.reset();
         updateImagesForNewVideo();
@@ -586,19 +576,6 @@ void CloudsVisionSystem::selfGuiEvent(ofxUIEventArgs &e)
         
         movieIndex = (movieIndex-1 + movieStrings.size()) % movieStrings.size();
         loadCurrentMovie();
-        //        player = ofPtr<ofVideoPlayer>(new ofVideoPlayer());
-        
-        //        if(player->loadMovie(movieStrings[ movieIndex] )){
-        //            player->play();
-        //        }
-        //        else{
-        //            cout<<"Not Playing"<<endl;
-        //        }
-        //        cout<<"Player dimensions (new) :"<< player->getWidth()<<" , "<<player->getHeight() <<endl;
-        //        updateCVParameters();
-        //        updateImagesForNewVideo();
-        //        populateOpticalFlowRegions();
-        //        resetFlowField();
     }
     
 }
@@ -615,6 +592,8 @@ void CloudsVisionSystem::loadCurrentMovie(){
     else{
         cout<<"Not Playing"<<endl;
     }
+    videoRect = ofRectangle(0,0,player->getWidth(),player->getHeight());
+    videoRect.alignTo(screenRect);
     cout<<"Player dimensions (new) :"<< player->getWidth()<<" , "<<player->getHeight() <<endl;
     updateCVParameters();
     populateOpticalFlowRegions();

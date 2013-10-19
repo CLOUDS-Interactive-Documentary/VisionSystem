@@ -55,6 +55,8 @@ public:
     void guiSystemEvent(ofxUIEventArgs &e);
     void updateImagesForNewVideo();
     void updateOpticalFlowParameters();
+    void updateHeatMap();
+    void updateContourTracking();
     void selfSetupRenderGui();
     void guiRenderEvent(ofxUIEventArgs &e);
     void getTextures();
@@ -133,7 +135,7 @@ protected:
     float qualityLevel;
     float minDistance;
     //    OPTFLOW_FARNEBACK_GAUSSIAN
-    
+    float flowLineMultiplier;
     //CONTUR PARAMETERS
     float cvPersistance;
     float cvMaxDistance;
@@ -142,9 +144,13 @@ protected:
     float cvThresholdValue;
     bool cvUpdateParameters;
     float lineWidth;
-    
+    float flowColorMapRange;
+    float flowLineWidth;
     float learningTime;
     float thresholdValue;
+    
+    ofRectangle screenRect;
+    ofRectangle videoRect;
     
     
 };
